@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="background">
+    <div id="header">
+      <div id="logo" class="header-col">
+        <a id="logo-link" href="https://njsoft.dev" target="_blank">
+          <img src="./images/logo.svg" width="152" height="50">
+        </a>
+      </div>
+      <div id="settings" class="header-col">
+        <button id="settings-btn" class="btn">Настройки</button>
+        <button id="save-btn" class="btn btn-white-no-border d-none" >Сохранить</button>
+      </div>
+    </div>
+    <div id="content-error" class="d-none"></div>
+    <div id="content-main" class="">
+      <div class="content-col">
+        <button id="rec-no-sound-btn" data-sound="0" class="js-rec-btn btn btn-white btn-icon-no-sound">
+          Запись без звука
+        </button>
+      </div>
+      <div class="content-col">
+        <button id="rec-with-sound-btn" data-sound="1" class="js-rec-btn btn btn-red btn-icon-with-sound">
+          Запись со звуком
+        </button>
+      </div>
+    </div>
+    <div id="content-record" class="d-none">
+      <div class="content-col-2">
+        <button id="pause" class="btn btn-white-no-border btn-icon-pause">
+          Пауза
+        </button>
+      </div>
+      <div class="content-col-2">
+        <button id="end" class="btn btn-blue btn-icon-stop">
+          Завершить
+        </button>
+      </div>
+    </div>
+    <div id="content-settings" class="d-none">
+      <div class="form-field">
+        <label for="video-file-format-selector" id="select-codec" class="mb25">Выбрать CODEC</label>
+
+        <select style="text-transform: uppercase" data-map="video_file_format" id="video-file-format-selector">
+          <option value="webm">video/webm (webm)</option>
+          <option value="webm-vp8">video/webm vp8</option>
+          <option value="webm-vp9">video/webm vp9</option>
+          <option value="webm-h264">video/webm h264</option>
+          <option value="mpeg">video/mpeg</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <p id="nc-settings-info">Если подключение к nextcloud не настроено, то запись будет идти в локальный файл.</p>
+      </div>
+      <div class="form-field">
+        <input data-map="schemeHost" id="input-address" type="text" placeholder="Адрес nextcloud">
+      </div>
+      <div class="form-field">
+        <input data-map="dir" id="input-dir" type="text" placeholder="Директория">
+      </div>
+      <div class="form-field">
+        <input data-map="user" id="input-username" type="text" placeholder="Логин">
+      </div>
+      <div class="form-field">
+        <input data-map="pass" id="input-pass" type="password" placeholder="Пароль">
+        <br>
+        <small id="pass-help">Рекомендуется использовать пароль приложения.</small>
+      </div>
+      <div class="form-field">
+        <p id="nc-check-result"></p>
+        <button id="settings-check-btn" class="btn btn-blue">Проверить</button>
+      </div>
+    </div>
+
+    <div id="indicator" class="d-none">
+      <progress id="upload-progress"></progress>
+    </div>
+
+    <div id="result" class="d-none">
+      <span id="result-link-label">Ссылка на видео</span>
+      <div id="link-dt"  ></div>
+      <a target="_blank"  id="link" href=""></a>
+    </div>
+
+    <div id="footer" class="">
+      <div class="footer-col">
+        <p id="footer-text">Для записи экрана нажмите одну из кнопок</p>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="popup.js"></script>
+</html>

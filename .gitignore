@@ -1,0 +1,8 @@
+.idea
+tmp
+*.log
+*.zip
+DC_Store
+.DC_Store
+node_modules/
+ts-ebml/

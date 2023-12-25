@@ -1,0 +1,277 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-size: 16px;
+    min-width: 640px;
+    min-height: 444px;
+}
+
+*:focus {
+    outline: none;
+}
+
+p, label, small {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #F0F6FF;
+    text-transform: uppercase;
+}
+
+small {
+    font-size: 12px;
+}
+
+#background {
+    background-image: url(/images/bg.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 650px;
+    min-height: 444px;
+}
+
+#header {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    width: 100%;
+}
+
+.header-col {
+    padding-left: 40px;
+    padding-top: 40px;
+    padding-right: 40px;
+}
+
+#logo {
+    flex: 2;
+}
+#logo {
+}
+
+#settings {
+    flex: 1;
+}
+
+button {
+    position: relative;
+    width: 100%;
+    height: 110%;
+    text-transform: uppercase;
+    background-color: #000000;
+    color: #F0F6FF;
+    border: 1px solid #F0F6FF;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    overflow: hidden;
+}
+
+button:after {
+    content: "";
+    background: #445b93;
+    display: block;
+    position: absolute;
+    padding-top: 300%;
+    padding-left: 350%;
+    margin-left: -20px!important;
+    margin-top: -120%;
+    opacity: 0;
+    transition: all 0.8s
+}
+button:active:after {
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    transition: 0s
+}
+
+button.btn-icon-no-sound::before {
+    content: url('/images/nosound-i.svg');
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+button.btn-icon-with-sound::before {
+    content: url('/images/sound-i.svg');
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+button.btn-icon-pause::before {
+    content: url('/images/pause.svg');
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+button.btn-icon-stop::before {
+    content: url('/images/end.svg');
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.btn-white {
+    background-color: #F0F6FF;
+    border: 1px solid #FF5C52;
+    color: #000000;
+}
+
+.btn-white-no-border {
+    background-color: #F0F6FF;
+    color: #000000;
+}
+
+.btn-red {
+    background-color: #FF5C52;
+    border: 1px solid #FF5C52;
+    color: #F0F6FF;
+}
+
+#settings-check-btn {
+    width: 160px;
+    height: 59px;
+}
+
+.btn-blue {
+    background-color: #2C4C9A;
+    border: 1px solid #2C4C9A;
+    color: #F0F6FF;
+}
+
+div#content-main, div#content-record {
+    display: flex;
+    margin-top: 132px;
+    align-items: flex-start;
+}
+
+.content-col {
+    flex: 1;
+    height: 50px;
+}
+
+.text-red {
+    color: #FF5C52;
+}
+
+.content-col-2 {
+    flex: 1;
+    height: 50px;
+}
+
+.content-col-2:first-child {
+    margin-left: 141px;
+    padding-right: 20px;
+}
+
+.content-col-2:last-child {
+    margin-right: 141px;
+    padding-left: 20px;
+}
+
+.content-col:last-child {
+    margin-right: 58px;
+    margin-left: 20px;
+}
+.content-col:first-child {
+    margin-right: 20px;
+    margin-left: 58px;
+}
+
+#footer {
+    padding-left: 40px;
+    position: absolute;
+    top: 385px;
+}
+
+.d-none {
+    display: none !important;
+}
+
+#content-settings {
+    padding-left: 40px;
+    padding-right: 40px;
+    margin-top: 71px;
+    min-height: 540px;
+    display: block;
+}
+
+.mt44 {
+    margin-top: 44px;
+}
+
+.mb31 {
+    margin-bottom: 31px;
+}
+
+select option {
+    margin: 40px;
+    background: #000000;
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+select {
+    padding-bottom: 20px !important;
+}
+
+.mb25 {
+    margin-bottom: 25px;
+    display: block;
+}
+
+::placeholder {
+    color: #F0F6FF;
+    opacity: 1; /* Firefox */
+}
+
+
+
+.form-field select, .form-field input {
+    display: block;
+    outline: none;
+    width: 100%;
+    background: none;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #F0F6FF;
+    color: #F0F6FF;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+}
+.form-field input {
+    height: 50px;
+}
+
+
+.form-field {
+    margin-top: 20px;
+}
+
+#indicator {
+    margin-top: 34px;
+    display: block;
+    right: 40px;
+    text-align: center;
+    position: absolute;
+    top: 362px;
+}
+#result a, #result a:visited, #result a:focus {
+    color: white;
+}
+#result {
+    color: white !important;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-top: 40px;
+    margin-left: 40px;
+}
+
+#content-error {
+    text-align: center;
+    margin-top: 132px;
+    color: red;
+}

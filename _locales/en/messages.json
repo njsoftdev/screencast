@@ -1,0 +1,92 @@
+{
+  "extName": {
+    "message": "Nextcloud screen recorder"
+  },
+  "extDesc": {
+    "message": "Record screen with audio and upload to your nextcloud server"
+  },
+  "rec": {
+    "message": "REC"
+  },
+  "recording": {
+    "message": "Recording in progress..."
+  },
+  "settings_btn": {
+    "message": "Settings"
+  },
+  "save_btn": {
+    "message": "Save"
+  },
+  "rec_no_sound_btn": {
+    "message": "REC. NO SOUND"
+  },
+  "rec_with_sound_btn": {
+    "message": "REC. WITH SOUND"
+  },
+  "pause": {
+    "message": "Pause"
+  },
+  "end": {
+    "message": "Complete"
+  },
+  "resume": {
+    "message": "Resume"
+  },
+  "select_codec": {
+    "message": "Choice codec"
+  },
+  "footer_text": {
+    "message": "To record your screen, press one of the buttons"
+  },
+  "input_address": {
+    "message": "Nextcloud address"
+  },
+  "input_dir": {
+    "message": "Directory"
+  },
+  "input_username": {
+    "message": "Login"
+  },
+  "input_pass": {
+    "message": "Password"
+  },
+  "recording_footer_text":{
+    "message": "Recording in progress. Pause or end recording."
+  },
+  "recording_footer_text_s":{
+    "message": "Recording with sound is in progress. Pause or end recording."
+  },
+  "recording_footer_text_no_s":{
+    "message": "Recording without sound. Pause or end recording."
+  },
+  "recording_footer_text_paused": {
+    "message": "Recording has been paused. Click resume or end recording."
+  },
+  "nc_check_ok": {
+    "message": "There is a connection"
+  },
+  "nc_check_error": {
+    "message": "No connection"
+  },
+  "next_cloud_wait_fetch_link": {
+    "message": "The download is complete. We receive a link..."
+  },
+  "next_cloud_file_uploading": {
+    "message": "Loading..."
+  },
+  "result_link_label": {
+    "message": "Link to video"
+  },
+  "settings_check_btn": {
+    "message": "Check"
+  },
+  "pass_help": {
+    "message": "It is recommended to use an application password."
+  },
+  "error": {
+    "message": "An error has occurred"
+  },
+  "logo_link": {
+    "message": "https://njsoft.dev"
+  }
+}

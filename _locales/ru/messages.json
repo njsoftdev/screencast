@@ -1,0 +1,92 @@
+{
+  "extName": {
+    "message": "Nextcloud screen recorder"
+  },
+  "extDesc": {
+    "message": "Записывает экран со звуком и загружает в ваш nextcloud сервер"
+  },
+  "rec": {
+    "message": "REC"
+  },
+  "recording": {
+    "message": "Идёт запись..."
+  },
+  "settings_btn": {
+    "message": "Настройки"
+  },
+  "save_btn": {
+    "message": "Сохранить"
+  },
+  "rec_no_sound_btn": {
+    "message": "Запись без звука"
+  },
+  "rec_with_sound_btn": {
+    "message": "Запись со звуком"
+  },
+  "pause": {
+    "message": "Пауза"
+  },
+  "end": {
+    "message": "Завершить"
+  },
+  "resume": {
+    "message": "Возобновить"
+  },
+  "select_codec": {
+    "message": "Выбрать codec"
+  },
+  "footer_text": {
+    "message": "Для записи экрана нажмите одну из кнопок"
+  },
+  "input_address": {
+    "message": "Адрес Nextcloud"
+  },
+  "input_dir": {
+    "message": "Директория"
+  },
+  "input_username": {
+    "message": "Логин"
+  },
+  "input_pass": {
+    "message": "Пароль"
+  },
+  "recording_footer_text":{
+    "message": "Идёт запись. Сделайте паузу или завершите запись."
+  },
+  "recording_footer_text_s":{
+    "message": "Идёт запись со звуком. Сделайте паузу или завершите запись."
+  },
+  "recording_footer_text_no_s":{
+    "message": "Идёт запись без звука. Сделайте паузу или завершите запись."
+  },
+  "recording_footer_text_paused": {
+    "message": "Запись приостановлена. Нажмите кнопку возобновить или завершите запись."
+  },
+  "nc_check_ok": {
+    "message": "Есть подключение"
+  },
+  "nc_check_error": {
+    "message": "Нет подключения"
+  },
+  "next_cloud_wait_fetch_link": {
+    "message": "Загрузка выполнена. Получаем ссылку..."
+  },
+  "next_cloud_file_uploading": {
+    "message": "Загрузка..."
+  },
+  "result_link_label": {
+    "message": "Ссылка на видео"
+  },
+  "settings_check_btn": {
+    "message": "Проверить"
+  },
+  "pass_help": {
+    "message": "Рекомендуется использовать пароль приложения."
+  },
+  "error": {
+    "message": "Произошла ошибка"
+  },
+  "logo_link": {
+    "message": "https://njsoft.ru"
+  }
+}
