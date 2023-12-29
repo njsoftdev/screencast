@@ -88,5 +88,14 @@
   },
   "logo_link": {
     "message": "https://njsoft.dev"
+  },
+  "upload_file_error": {
+    "message": "Error № 1. An error has occurred."
+  },
+  "fetch_video_player_link_error": {
+    "message": "Error № 2. An error has occurred."
+  },
+  "dont_close_window": {
+    "message": "Recording in progress"
   }
 }

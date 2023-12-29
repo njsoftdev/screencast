@@ -115,8 +115,6 @@ async function recordScreen(currentTabId, streamId, audioStream)
 
             const blobFile = new Blob([refinedMetadataBuf, body], {type: nextCloud.getVideoMime()});
             const url = URL.createObjectURL(blobFile);
-
-
             const fileName = 'Screen-recording-'+Date.now()+(sound ? '-with-sound' : '-no-sound') + '.' + nextCloud.getVideoFileFormat();
             if(nextCloud.hasSetup())
             {
@@ -124,37 +122,33 @@ async function recordScreen(currentTabId, streamId, audioStream)
                 nextCloud.uploadFile(blobFile, fileName).then(async function (response) {
                     chrome.runtime.sendMessage({ name: 'nextCloudUploadWaitFetchLink', data: '' });
                     nextCloud.fetchVideoPlayerLink(fileName).then((link) => {
-                        let options = {
+                        let dt = new Intl.DateTimeFormat(undefined, {
                             year: "numeric",
                             month: "short",
                             day: "numeric",
                             hour: "numeric",
                             minute: "numeric",
                             second: "numeric"
-                        };
-                        let dt = new Intl.DateTimeFormat(undefined, options).format(new Date());
+                        }).format(new Date());
                         chrome.storage.sync.set({nc_last_link: link, nc_last_link_date: dt});
                         chrome.runtime.sendMessage({ name: 'nextCloudUploadSuccess', data: { url: link, date_time: dt } });
+                        _closeRecorder();
+                    }, (reason) => {
+                        _downloadLocal(url, fileName);
+                        _showError(chrome.i18n.getMessage('fetch_video_player_link_error'));
+                        console.error('fetch_video_player_link_error');
                     });
-
-                    setTimeout(function () {
-                        window.close();
-                    }, 2000);
-                });
+                }, (reason => {
+                    chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: 'upload_error' });
+                    _downloadLocal(url, fileName);
+                    _showError(chrome.i18n.getMessage('upload_file_error'));
+                    console.error('upload_file_error');
+                }));
             }
             else
             {
-                const downloadLink = document.createElement('a');
-                downloadLink.href = url;
-                downloadLink.download = fileName;
-                window.document.body.appendChild(downloadLink);
-
-                downloadLink.click();
-                let dt = new Intl.DateTimeFormat(undefined, options).format(new Date());
-                chrome.runtime.sendMessage({ name: 'captureFinished', data: { url: 'local', date_time: dt } });
-                setTimeout(function () {
-                    window.close();
-                }, 2000);
+                _downloadLocal(url, fileName);
+                _closeRecorder();
             }
         }
 
@@ -163,6 +157,40 @@ async function recordScreen(currentTabId, streamId, audioStream)
         // After all setup, focus on previous tab (where the recording was requested)
         await chrome.tabs.update(currentTabId, { active: true, selected: true })
     });
+}
+
+function _downloadLocal(url, fileName)
+{
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = fileName;
+    window.document.body.appendChild(downloadLink);
+
+    downloadLink.click();
+    let dt = new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
+    }).format(new Date());
+    let link = url;
+
+    chrome.storage.sync.set({nc_last_link: link, nc_last_link_date: dt});
+    chrome.runtime.sendMessage({ name: 'captureFinished', data: { url: link, date_time: dt } });
+}
+
+function _closeRecorder()
+{
+    setTimeout(function () {
+        window.close();
+    }, 2000);
+}
+
+function _showError(msg) {
+    alert(msg);
+    document.getElementById('dont-close-window').innerText = msg;
 }
 
 let nextCloud = {
@@ -310,7 +338,7 @@ let nextCloud = {
                 console.log("completed stream");
             },
         });
-        const response = await fetch(url, {
+        return await fetch(url, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/octet-stream",
@@ -318,10 +346,7 @@ let nextCloud = {
             },
             body: blob.stream().pipeThrough(progressTrackingStream),
             duplex: "half",
-        }).then(() => {}, (reason => {
-            chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: 'upload_error' });
-            console.error('upload_error');
-        }));
+        });
     },
     createAuthHeaderValue: () => {
         return "Basic " + btoa(this.user + ":" + this.pass);

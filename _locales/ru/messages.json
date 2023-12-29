@@ -88,5 +88,14 @@
   },
   "logo_link": {
     "message": "https://njsoft.ru"
+  },
+  "upload_file_error": {
+    "message": "Ошибка № 1. Произошла ошибка загрузки файла. Проверьте настройки для Nextcloud"
+  },
+  "fetch_video_player_link_error": {
+    "message": "Ошибка № 2. Произошла ошибка получения информации о файле. Проверьте настройки для Nextcloud"
+  },
+  "dont_close_window": {
+    "message": "Не закрывайте окно. Идёт запись"
   }
 }

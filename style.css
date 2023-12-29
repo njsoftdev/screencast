@@ -251,6 +251,12 @@ select {
     margin-top: 20px;
 }
 
+#link {
+    max-height: 40px;
+    overflow: hidden;
+    display: block;
+}
+
 #indicator {
     margin-top: 34px;
     display: block;
