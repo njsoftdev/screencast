@@ -135,19 +135,22 @@ async function recordScreen(currentTabId, streamId, audioStream)
                         _closeRecorder();
                     }, (reason) => {
                         _downloadLocal(url, fileName);
+                        _saveLocal(url, blobFile);
                         _showError(chrome.i18n.getMessage('fetch_video_player_link_error'));
                         console.error('fetch_video_player_link_error');
                     });
                 }, (reason => {
                     chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: 'upload_error' });
                     _downloadLocal(url, fileName);
+                    _saveLocal(url, blobFile);
                     _showError(chrome.i18n.getMessage('upload_file_error'));
                     console.error('upload_file_error');
                 }));
             }
             else
             {
-                _downloadLocal(url, fileName);
+                _downloadLocal(url, fileName, blobFile);
+                _saveLocal(url, blobFile);
                 _closeRecorder();
             }
         }
@@ -159,6 +162,33 @@ async function recordScreen(currentTabId, streamId, audioStream)
     });
 }
 
+function _saveLocal(link, blobRaw)
+{
+    // Сохраняем чтобы локально было
+    if(blobRaw)
+    {
+        let reader = new FileReader();
+        reader.readAsDataURL(blobRaw);
+        reader.onload = function() {
+            chrome.storage.local.set({ blob: reader.result }).then(() => {});
+
+            let link = url;
+
+            let dt = new Intl.DateTimeFormat(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+                second: "numeric"
+            }).format(new Date());
+
+            chrome.storage.sync.set({nc_last_link: link, nc_last_link_date: dt});
+            chrome.runtime.sendMessage({ name: 'captureFinished', data: { url: link, date_time: dt } });
+        };
+    }
+}
+
 function _downloadLocal(url, fileName)
 {
     const downloadLink = document.createElement('a');
@@ -167,18 +197,6 @@ function _downloadLocal(url, fileName)
     window.document.body.appendChild(downloadLink);
 
     downloadLink.click();
-    let dt = new Intl.DateTimeFormat(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        second: "numeric"
-    }).format(new Date());
-    let link = url;
-
-    chrome.storage.sync.set({nc_last_link: link, nc_last_link_date: dt});
-    chrome.runtime.sendMessage({ name: 'captureFinished', data: { url: link, date_time: dt } });
 }
 
 function _closeRecorder()

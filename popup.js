@@ -37,7 +37,6 @@ function _initUi() {
         'select-codec',
         'nc-settings-info',
         'footer-text',
-        'result-link-label',
         'settings-check-btn',
         'pass-help'
     ].forEach(function (id) {
@@ -183,7 +182,6 @@ async function _showInitUi()
         'rec-with-sound-btn',
         'settings-btn',
         'footer-text',
-        'result-link-label'
     ].forEach((id) => {
         document.getElementById(id).classList.remove('d-none');
     });
@@ -206,7 +204,7 @@ async function _showInitUi()
         link.classList.remove('d-none');
         link.setAttribute('href', lastNcLink);
         link.setAttribute('href', lastNcLink);
-        link.innerText = lastNcLink;
+        link.innerText = chrome.i18n.getMessage('Link');
 
         if(lastScreencastLink.hasOwnProperty('nc_last_link_date'))
         {
@@ -214,6 +212,19 @@ async function _showInitUi()
             linkDt.innerText = lastScreencastLink.nc_last_link_date;
         }
     }
+
+    chrome.storage.local.get(["blob"]).then((result) => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const tab = chrome.tabs.create({
+                url: chrome.runtime.getURL('download.html'),
+                pinned: true,
+                active: true,
+            });
+            return false;
+
+        });
+    });
 }
 
 function _bindPauseButton()

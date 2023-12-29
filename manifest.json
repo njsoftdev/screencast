@@ -22,7 +22,8 @@
     "tabs",
     "activeTab",
     "desktopCapture",
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ],
   "host_permissions": [
     "*://*/*"

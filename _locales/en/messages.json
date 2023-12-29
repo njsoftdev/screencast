@@ -33,7 +33,7 @@
     "message": "Resume"
   },
   "select_codec": {
-    "message": "Choice codec"
+    "message": "Select codec"
   },
   "footer_text": {
     "message": "To record your screen, press one of the buttons"
@@ -97,5 +97,8 @@
   },
   "dont_close_window": {
     "message": "Recording in progress"
+  },
+  "link": {
+    "message": "Link"
   }
 }
