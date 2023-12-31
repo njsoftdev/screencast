@@ -8,12 +8,12 @@ Extension for chrome/chromium browser
 
 ## How to install and setup ?
 - Do git clone or download zip (if it zip then unpack it)
-- In your browser open chrome://extensions/ and enable developer mode then load unpacked
+- In your browser open [chrome://extensions](chrome://extensions) and enable developer mode then load unpacked
 - Select unpacked (or cloned) dir and pin it from extensions icon near omnibox.
 - To setup nextcloud uploading click on extension icon and click Settings and fill the form. Please use application password ( /settings/user/security )
 
 ## How it works?
-Extension uses MediaStream recording API and library ts-ebml for extract duration information after finish capture. If nextcloud settings enabled, video will upload to server through webdav. It's important to use application password.
+Extension uses [MediaStream recording API](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API) and library [ts-ebml](https://github.com/legokichi/ts-ebml) for extract duration information after finish capture. If nextcloud settings enabled, video will upload to server through [webdav](https://docs.nextcloud.com/server/latest/developer_manual/client_apis/WebDAV/basic.html). It's important to use application password.
 
 ### Screenshots 
 ![](screenshot1.png)
@@ -36,12 +36,12 @@ If you like it and want to say thanks, [donations](https://donate.stripe.com/3cs
 
 ## Как установить и настроить?
 - Скачать репозиторий (git clone) или архив репозитория (zip и распаковать его).
-- В браузере открыть управление расширениями chrome://extensions/ и включить Режим разработчика, затем нажать на кнопку Загрузить распакованное расширение
+- В браузере открыть управление расширениями [chrome://extensions](chrome://extensions) и включить Режим разработчика, затем нажать на кнопку Загрузить распакованное расширение
 - Выбрать распакованную или склонированную папку расширения
 - Для настройки соединения с вашим Nextcloud сервером, нужно нажать на кнопку Настройки и заполнить форму. Необходимо использовать пароль приложения  ( /settings/user/security ) иначе загрузка в Nextcloud через webdav не будет работать.
 
 ## Как это работает?
-Расширение использует MediaStream recording API и библиотеку ts-ebml для добавления информации длительности видеофайла после завершения записи.
+Расширение использует [MediaStream recording API](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API) и библиотеку [ts-ebml](https://github.com/legokichi/ts-ebml) для добавления информации длительности видеофайла после завершения записи. Связь с Nextcloud работает через [webdav](https://docs.nextcloud.com/server/latest/developer_manual/client_apis/WebDAV/basic.html)
 
 Страница расширения https://njsoft.dev/solutions/nj-screencast/
 
