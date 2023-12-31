@@ -127,7 +127,7 @@ function _bindSettingsForm()
                 "Accept": "text/plain",
                 "Depth": 1,
                 "Content-Type": "application/xml",
-                "Authorization": "Bearer " + authHeader
+                "Authorization": "Basic " + authHeader
             },
             body: propertyRequestBody
         }).then((response) => {

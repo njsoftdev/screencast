@@ -364,6 +364,6 @@ let nextCloud = {
         });
     },
     createAuthHeaderValue: () => {
-        return "Bearer " + btoa(this.user + ":" + this.pass);
+        return "Basic " + btoa(this.user + ":" + this.pass);
     }
 };
