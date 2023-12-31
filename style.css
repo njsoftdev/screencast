@@ -281,3 +281,7 @@ select {
     margin-top: 132px;
     color: red;
 }
+
+#pass-help a {
+    color: #FF5C52;
+}

@@ -1,39 +1,51 @@
-# RU
-## Расширение для записи экрана
-Данное расширение устанавливается в браузер (chrome, chromium) и позволяет записывать экран, и сохранять записи локально или на своё облако в `Nextcloud`.
+# NJ Screencast - free, safe and easy solution for screen recording in Chrome.
+Extension for chrome/chromium browser
 
-## Как установить ?
+## This extension allows you to:
+- Record your desktop with or without sound
+- Select codec (webm/vp8/vp9/h264 or mpeg)
+- Save files locally or to your own server Nextcloud
 
-1. Скачать репозиторий (`git clone`) или архив репозитория (`zip` и распаковать его).
-2. В браузере открыть управление расширениями `chrome://extensions/` и включить `Режим разработчика`, затем нажать на кнопку `Загрузить распакованное расширение`
-3. Выбрать распакованную или склонированную папку расширения
-4. Для настройки соединения с вашим `Nextcloud` сервером, нужно нажать на кнопку `Настройки` и заполнить форму.
+## How to install and setup ?
+- Do git clone or download zip (if it zip then unpack it)
+- In your browser open chrome://extensions/ and enable developer mode then load unpacked
+- Select unpacked (or cloned) dir and pin it from extensions icon near omnibox.
+- To setup nextcloud uploading click on extension icon and click Settings and fill the form. Please use application password ( /settings/user/security )
 
-### Как это работает?
+## How it works?
+Extension uses MediaStream recording API and library ts-ebml for extract duration information after finish capture. If nextcloud settings enabled, video will upload to server through webdav. It's important to use application password.
 
-Расширение использует [MediaStream recording API](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API) и библиотеку [ts-ebml](https://github.com/legokichi/ts-ebml) для добавления информации длительности видеофайла после завершения записи.
-
-
-# EN
-## Screencast
-This extension setup in browser (chrome, chromium) and save video files to local host or to `Nextcloud` instance.
-
-## How to install ?
-
-1. Do `git clone` or `download zip` (if it zip then unpack it)
-2. In your browser open `chrome://extensions/` and enable `developer mode` then `load unpacked`
-3. Select unpacked (or cloned) dir and `pin` it from extensions icon near omnibox.
-4. To setup `nextcloud uploading` click on extension icon and click `Settings` and fill the form.
-
-### How it works?
-
-Extension uses [MediaStream recording API](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API) and library [ts-ebml](https://github.com/legokichi/ts-ebml) for extract duration information after finish capture.
-
-
-### Скриншоты / Screenshots
+### Screenshots 
 ![](screenshot1.png)
 
 ![](screenshot2.png)
 
+### Donations
 
-### If you like it and want to say thanks, [donations](https://donate.stripe.com/3cseYI2OQ8J0aOI288) are welcome.
+If you like it and want to say thanks, [donations](https://donate.stripe.com/3cseYI2OQ8J0aOI288) are welcome.
+
+---
+
+# NJ Screencast - бесплатное, безопасное и простое решение для записи экрана.
+Данное расширение устанавливается в браузер chrome или chromium.
+
+## Данное расширение позволит вам:
+- Записывать декстоп со звуком, или без звука
+- Использовать разнообразные кодеки (webm/vp8/vp9/h264 или mpeg)
+- Сохранять файлы локально или на ваш сервер Nextcloud
+
+## Как установить и настроить?
+- Скачать репозиторий (git clone) или архив репозитория (zip и распаковать его).
+- В браузере открыть управление расширениями chrome://extensions/ и включить Режим разработчика, затем нажать на кнопку Загрузить распакованное расширение
+- Выбрать распакованную или склонированную папку расширения
+- Для настройки соединения с вашим Nextcloud сервером, нужно нажать на кнопку Настройки и заполнить форму. Необходимо использовать пароль приложения  ( /settings/user/security ) иначе загрузка в Nextcloud через webdav не будет работать.
+
+## Как это работает?
+Расширение использует MediaStream recording API и библиотеку ts-ebml для добавления информации длительности видеофайла после завершения записи.
+
+Страница расширения https://njsoft.dev/solutions/nj-screencast/
+
+### Скриншоты
+![](screenshot3.png)
+
+![](screenshot4.png)

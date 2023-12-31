@@ -81,7 +81,10 @@
     "message": "Check"
   },
   "pass_help": {
-    "message": "It is recommended to use an application password."
+    "message": "Use application password."
+  },
+  "pass_help_w_link": {
+    "message": "Use <a target=\"_blank\" href=link>application password</a>."
   },
   "error": {
     "message": "An error has occurred"
@@ -100,5 +103,8 @@
   },
   "link": {
     "message": "Link"
+  },
+  "view": {
+    "message": "View"
   }
 }

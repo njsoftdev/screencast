@@ -135,22 +135,22 @@ async function recordScreen(currentTabId, streamId, audioStream)
                         _closeRecorder();
                     }, (reason) => {
                         _downloadLocal(url, fileName);
-                        _saveLocal(url, blobFile);
+                        _saveLocal(blobFile);
                         _showError(chrome.i18n.getMessage('fetch_video_player_link_error'));
                         console.error('fetch_video_player_link_error');
                     });
                 }, (reason => {
                     chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: 'upload_error' });
                     _downloadLocal(url, fileName);
-                    _saveLocal(url, blobFile);
+                    _saveLocal(blobFile);
                     _showError(chrome.i18n.getMessage('upload_file_error'));
                     console.error('upload_file_error');
                 }));
             }
             else
             {
-                _downloadLocal(url, fileName, blobFile);
-                _saveLocal(url, blobFile);
+                _downloadLocal(url, fileName);
+                _saveLocal(blobFile);
                 _closeRecorder();
             }
         }
@@ -162,7 +162,7 @@ async function recordScreen(currentTabId, streamId, audioStream)
     });
 }
 
-function _saveLocal(link, blobRaw)
+function _saveLocal(blobRaw)
 {
     // Сохраняем чтобы локально было
     if(blobRaw)
@@ -171,9 +171,6 @@ function _saveLocal(link, blobRaw)
         reader.readAsDataURL(blobRaw);
         reader.onload = function() {
             chrome.storage.local.set({ blob: reader.result }).then(() => {});
-
-            let link = url;
-
             let dt = new Intl.DateTimeFormat(undefined, {
                 year: "numeric",
                 month: "short",
@@ -183,8 +180,8 @@ function _saveLocal(link, blobRaw)
                 second: "numeric"
             }).format(new Date());
 
-            chrome.storage.sync.set({nc_last_link: link, nc_last_link_date: dt});
-            chrome.runtime.sendMessage({ name: 'captureFinished', data: { url: link, date_time: dt } });
+            chrome.storage.sync.set({nc_last_link: 'local', nc_last_link_date: dt});
+            chrome.runtime.sendMessage({ name: 'captureFinished', data: { url: 'local', date_time: dt } });
         };
     }
 }
@@ -367,6 +364,6 @@ let nextCloud = {
         });
     },
     createAuthHeaderValue: () => {
-        return "Basic " + btoa(this.user + ":" + this.pass);
+        return "Bearer " + btoa(this.user + ":" + this.pass);
     }
 };

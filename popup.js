@@ -99,6 +99,11 @@ function _bindSettingsForm()
         });
     });
 
+    if(nextCloudSettings.schemeHost)
+    {
+        document.getElementById('pass-help').innerHTML = chrome.i18n.getMessage('pass_help_w_link').replace('link', '"'+nextCloudSettings.schemeHost+'/settings/user/security"');
+    }
+
     formatSelector.addEventListener('change', function (e) {
         nextCloudSettings.video_file_format = e.target.value;
         updateSettings();
@@ -122,7 +127,7 @@ function _bindSettingsForm()
                 "Accept": "text/plain",
                 "Depth": 1,
                 "Content-Type": "application/xml",
-                "Authorization": "Basic " + authHeader
+                "Authorization": "Bearer " + authHeader
             },
             body: propertyRequestBody
         }).then((response) => {
@@ -203,7 +208,6 @@ async function _showInitUi()
         resultContainer.classList.remove('d-none');
         link.classList.remove('d-none');
         link.setAttribute('href', lastNcLink);
-        link.setAttribute('href', lastNcLink);
         link.innerText = chrome.i18n.getMessage('Link');
 
         if(lastScreencastLink.hasOwnProperty('nc_last_link_date'))
@@ -213,18 +217,22 @@ async function _showInitUi()
         }
     }
 
-    chrome.storage.local.get(["blob"]).then((result) => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const tab = chrome.tabs.create({
-                url: chrome.runtime.getURL('download.html'),
-                pinned: true,
-                active: true,
-            });
-            return false;
+    if(lastNcLink === 'local')
+    {
+        chrome.storage.local.get(["blob"]).then((result) => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const tab = chrome.tabs.create({
+                    url: chrome.runtime.getURL('download.html'),
+                    pinned: false,
+                    active: true,
+                });
+                return false;
 
+            });
         });
-    });
+    }
+
 }
 
 function _bindPauseButton()
