@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "NJ Screencast - free, safe and easy solution for screen recording in Chrome."
+    "message": "NJ Screencast solution for screen recording"
   },
   "extDesc": {
-    "message": "Record your desktop with or without sound. Save files locally or to your own server Nextcloud"
+    "message": "Record your desktop with or without sound"
   },
   "rec": {
     "message": "REC"
