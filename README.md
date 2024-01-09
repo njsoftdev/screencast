@@ -7,6 +7,13 @@ Extension for chrome/chromium browser
 - Save files locally or to your own server Nextcloud
 
 ## How to install and setup ?
+
+#### Install from web store
+
+[Link to install ](https://chromewebstore.google.com/detail/nj-screencast-%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D1%8D%D0%BA%D1%80%D0%B0/lpahdblhaaaociedcbjkaechgehhlogh)
+
+#### Install from git
+
 - Do git clone or download zip (if it zip then unpack it)
 - In your browser open [chrome://extensions](chrome://extensions) and enable developer mode then load unpacked
 - Select unpacked (or cloned) dir and pin it from extensions icon near omnibox.
@@ -35,6 +42,13 @@ If you like it and want to say thanks, [donations](https://donate.stripe.com/3cs
 - Сохранять файлы локально или на ваш сервер Nextcloud
 
 ## Как установить и настроить?
+
+#### Установить из магазина расширений
+
+[Ссылка на расширение в магазине](https://chromewebstore.google.com/detail/nj-screencast-%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D1%8D%D0%BA%D1%80%D0%B0/lpahdblhaaaociedcbjkaechgehhlogh)
+
+#### Установить из репозитория
+
 - Скачать репозиторий (git clone) или архив репозитория (zip и распаковать его).
 - В браузере открыть управление расширениями [chrome://extensions](chrome://extensions) и включить Режим разработчика, затем нажать на кнопку Загрузить распакованное расширение
 - Выбрать распакованную или склонированную папку расширения
