@@ -83,8 +83,17 @@
   "pass_help": {
     "message": "Use application password."
   },
+  "pass_help_prefix": {
+    "message": "Use"
+  },
+  "pass_help_link_text": {
+    "message": "application password"
+  },
   "pass_help_w_link": {
     "message": "Use <a target=\"_blank\" href=link>application password</a>."
+  },
+  "cancel_btn": {
+    "message": "Cancel"
   },
   "error": {
     "message": "An error has occurred"
@@ -101,10 +110,49 @@
   "dont_close_window": {
     "message": "Recording in progress"
   },
+  "codec_not_supported": {
+    "message": "The selected codec is not supported by the browser. Choose another in settings."
+  },
   "link": {
     "message": "Link"
   },
   "view": {
     "message": "View"
+  },
+  "save_destination_label": {
+    "message": "Save recording"
+  },
+  "save_destination_local": {
+    "message": "Locally (default)"
+  },
+  "save_destination_nextcloud": {
+    "message": "Nextcloud"
+  },
+  "save_destination_bitrix24": {
+    "message": "Bitrix24"
+  },
+  "bitrix24_settings_info": {
+    "message": "Enter your Bitrix24 incoming webhook URL (Applications → Incoming webhook). Recordings will be uploaded to the portal Drive."
+  },
+  "bitrix24_webhook_label": {
+    "message": "Bitrix24 webhook URL"
+  },
+  "bitrix24_storage_type_label": {
+    "message": "Drive"
+  },
+  "bitrix24_storage_personal": {
+    "message": "Personal drive (default)"
+  },
+  "bitrix24_storage_common": {
+    "message": "Common drive"
+  },
+  "bitrix24_folder_label": {
+    "message": "Folder for screencasts"
+  },
+  "bitrix24_check_error": {
+    "message": "Enter webhook URL or check connection"
+  },
+  "bitrix24_upload_error": {
+    "message": "Bitrix24 upload error. Check webhook URL and permissions."
   }
 }

@@ -81,10 +81,19 @@
     "message": "Проверить"
   },
   "pass_help": {
-    "message": "Используйте пароль приложения."
+    "message": "Рекомендуется использовать пароль приложения."
+  },
+  "pass_help_prefix": {
+    "message": "Рекомендуется использовать"
+  },
+  "pass_help_link_text": {
+    "message": "пароль приложения"
   },
   "pass_help_w_link": {
     "message": "Используйте <a target=\"_blank\" href=link>пароль приложения</a>."
+  },
+  "cancel_btn": {
+    "message": "Отмена"
   },
   "error": {
     "message": "Произошла ошибка"
@@ -101,10 +110,49 @@
   "dont_close_window": {
     "message": "Не закрывайте окно. Идёт запись"
   },
+  "codec_not_supported": {
+    "message": "Выбранный кодек не поддерживается браузером. Выберите другой в настройках."
+  },
   "link": {
     "message": "Ссылка на видео"
   },
   "view": {
     "message": "Просмотр"
+  },
+  "save_destination_label": {
+    "message": "Сохранить запись"
+  },
+  "save_destination_local": {
+    "message": "Локально (по умолчанию)"
+  },
+  "save_destination_nextcloud": {
+    "message": "Nextcloud"
+  },
+  "save_destination_bitrix24": {
+    "message": "Битрикс24"
+  },
+  "bitrix24_settings_info": {
+    "message": "Укажите URL входящего вебхука Битрикс24 (Приложения → Входящий вебхук). Запись будет загружаться в Диск портала."
+  },
+  "bitrix24_webhook_label": {
+    "message": "URL вебхука Битрикс24"
+  },
+  "bitrix24_storage_type_label": {
+    "message": "Диск"
+  },
+  "bitrix24_storage_personal": {
+    "message": "Личный диск (по умолчанию)"
+  },
+  "bitrix24_storage_common": {
+    "message": "Общий диск"
+  },
+  "bitrix24_folder_label": {
+    "message": "Папка для скринкастов"
+  },
+  "bitrix24_check_error": {
+    "message": "Укажите URL вебхука или проверьте подключение"
+  },
+  "bitrix24_upload_error": {
+    "message": "Ошибка загрузки в Битрикс24. Проверьте URL вебхука и права."
   }
 }

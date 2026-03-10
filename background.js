@@ -10,17 +10,22 @@ const startRecording = async (msg) => {
       active: true,
     });
 
-    // Wait for recording screen tab to be loaded and send message to it with the currentTab
-    chrome.tabs.onUpdated.addListener(async function listener(tabId, info) {
+    // Wait for recording screen tab to be loaded and send message to it with the currentTab.
+    // Small delay so recorder.js has time to register its onMessage listener.
+    chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
       if (tabId === tab.id && info.status === 'complete') {
         chrome.tabs.onUpdated.removeListener(listener);
-
-        await chrome.tabs.sendMessage(tabId, {
-          name: msg === 'initiateRecording' ? 'startRecording' : 'startRecordingNoSound',
-          body: {
-            currentTab: currentTab,
-          },
-        });
+        setTimeout(function () {
+          var payload = {
+            name: msg === 'initiateRecording' ? 'startRecording' : 'startRecordingNoSound',
+            body: { currentTab: currentTab },
+          };
+          chrome.tabs.sendMessage(tabId, payload).then(function () {
+            // delivered
+          }).catch(function () {
+            // Recorder tab closed or listener not ready; ignore
+          });
+        }, 500);
       }
     });
   });
@@ -30,5 +35,10 @@ const startRecording = async (msg) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.name === 'initiateRecording' || request.name === 'initiateRecordingNoSound') {
     startRecording(request.name);
+    return;
+  }
+  // Handle upload status when popup is closed (state is stored by recorder/popup)
+  if (request.name === 'nextCloudUploadSuccess' || request.name === 'nextCloudUploadFileError' || request.name === 'captureFinished') {
+    sendResponse({ received: true });
   }
 });

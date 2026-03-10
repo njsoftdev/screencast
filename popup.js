@@ -1,9 +1,13 @@
 let nextCloudSettings = {
+    save_destination: 'local',
     user: null,
     pass: null,
     dir: null,
     schemeHost: null,
-    video_file_format: 'webp',
+    video_file_format: 'webm',
+    bitrix24_webhook_url: null,
+    bitrix24_storage_type: 'personal',
+    bitrix24_folder_name: 'screen-recordings',
     paused: false,
     recording: false,
     with_sound: false
@@ -30,17 +34,26 @@ function _initUi() {
     [
         'settings-btn',
         'save-btn',
+        'cancel-btn',
         'rec-no-sound-btn',
         'rec-with-sound-btn',
         'pause',
         'end',
+        'save-destination-label',
         'select-codec',
         'nc-settings-info',
+        'bitrix24-settings-info',
+        'bitrix24-webhook-label',
+        'bitrix24-storage-type-label',
+        'bitrix24-folder-label',
         'footer-text',
         'settings-check-btn',
         'pass-help'
     ].forEach(function (id) {
-        document.getElementById(id).innerText = chrome.i18n.getMessage(id.replace(/-/g, '_'));
+        const el = document.getElementById(id);
+        if (el && id !== 'pass-help') {
+            el.innerText = chrome.i18n.getMessage(id.replace(/-/g, '_'));
+        }
     });
 
     // Placeholders
@@ -75,33 +88,118 @@ function _initUi() {
     }
 }
 
+function _originFromHost(schemeHost) {
+    const s = (schemeHost || '').trim().replace(/\/+$/, '');
+    if (!s) return null;
+    try {
+        const url = s.startsWith('http') ? new URL(s) : new URL('https://' + s);
+        return url.origin;
+    } catch (e) {
+        return null;
+    }
+}
+
+function _restoreSettingsFormFrom(settings) {
+    ['save_destination', 'schemeHost', 'dir', 'user', 'pass', 'video_file_format', 'bitrix24_webhook_url', 'bitrix24_storage_type', 'bitrix24_folder_name'].forEach((key) => {
+        const el = document.querySelector('[data-map="' + key + '"]');
+        if (el && settings[key] != null) el.value = settings[key];
+    });
+    _toggleDestinationBlocks(settings.save_destination);
+}
+
+function _toggleDestinationBlocks(destination) {
+    const blockNextcloud = document.getElementById('block-nextcloud');
+    const blockBitrix24 = document.getElementById('block-bitrix24');
+    blockNextcloud.classList.toggle('d-none', destination !== 'nextcloud');
+    blockBitrix24.classList.toggle('d-none', destination !== 'bitrix24');
+}
+
 function _bindSettingsForm()
 {
     const checkResult = document.getElementById('nc-check-result');
     checkResult.classList.remove('text-red');
+
+    const saveDestinationSelect = document.getElementById('save-destination-select');
+    if (saveDestinationSelect) {
+        const localOpt = saveDestinationSelect.querySelector('option[value="local"]');
+        const nextcloudOpt = saveDestinationSelect.querySelector('option[value="nextcloud"]');
+        const bitrix24Opt = saveDestinationSelect.querySelector('option[value="bitrix24"]');
+        if (localOpt) localOpt.textContent = chrome.i18n.getMessage('save_destination_local');
+        if (nextcloudOpt) nextcloudOpt.textContent = chrome.i18n.getMessage('save_destination_nextcloud');
+        if (bitrix24Opt) bitrix24Opt.textContent = chrome.i18n.getMessage('save_destination_bitrix24');
+        saveDestinationSelect.value = nextCloudSettings.save_destination || 'local';
+        saveDestinationSelect.addEventListener('change', function () {
+            nextCloudSettings.save_destination = saveDestinationSelect.value;
+            _toggleDestinationBlocks(nextCloudSettings.save_destination);
+            updateSettings();
+        });
+    }
+    _toggleDestinationBlocks(nextCloudSettings.save_destination || 'local');
+
+    var bitrix24StorageSelect = document.getElementById('bitrix24-storage-type');
+    if (bitrix24StorageSelect && !bitrix24StorageSelect.querySelector('option')) {
+        var optPersonal = document.createElement('option');
+        optPersonal.value = 'personal';
+        optPersonal.textContent = chrome.i18n.getMessage('bitrix24_storage_personal');
+        var optCommon = document.createElement('option');
+        optCommon.value = 'common';
+        optCommon.textContent = chrome.i18n.getMessage('bitrix24_storage_common');
+        bitrix24StorageSelect.appendChild(optPersonal);
+        bitrix24StorageSelect.appendChild(optCommon);
+        bitrix24StorageSelect.addEventListener('change', function () {
+            nextCloudSettings.bitrix24_storage_type = bitrix24StorageSelect.value;
+            updateSettings();
+        });
+    }
+    if (bitrix24StorageSelect) bitrix24StorageSelect.value = nextCloudSettings.bitrix24_storage_type || 'personal';
+    var bitrix24FolderInput = document.getElementById('input-bitrix24-folder');
+    if (bitrix24FolderInput && !bitrix24FolderInput.placeholder) {
+        bitrix24FolderInput.placeholder = 'screen-recordings';
+    }
 
     let schemeHost = document.getElementById('input-address');
     let ncDir = document.getElementById('input-dir');
     let ncUser = document.getElementById('input-username');
     let ncPass = document.getElementById('input-pass');
     let formatSelector = document.getElementById('video-file-format-selector');
+    let bitrix24Webhook = document.getElementById('input-bitrix24-webhook');
 
-    [schemeHost, ncDir, ncUser, ncPass, formatSelector].forEach((node) => {
+    const formNodes = [schemeHost, ncDir, ncUser, ncPass, formatSelector, bitrix24Webhook, bitrix24StorageSelect, bitrix24FolderInput].filter(Boolean);
+    formNodes.forEach((node) => {
+        if (!node) return;
         let key = node.getAttribute('data-map');
-        if(nextCloudSettings.hasOwnProperty(key) && nextCloudSettings[key] !== null && nextCloudSettings[key] !== '')
+        if (!key) return;
+        if (nextCloudSettings.hasOwnProperty(key) && nextCloudSettings[key] != null && nextCloudSettings[key] !== '')
         {
             node.value = nextCloudSettings[key];
         }
+        if (key === 'bitrix24_folder_name' && (!nextCloudSettings[key] || nextCloudSettings[key] === '')) {
+            node.value = 'screen-recordings';
+        }
         node.addEventListener('keyup', function () {
-
+            nextCloudSettings[key] = node.value;
+            updateSettings();
+        });
+        node.addEventListener('change', function () {
             nextCloudSettings[key] = node.value;
             updateSettings();
         });
     });
 
-    if(nextCloudSettings.schemeHost)
-    {
-        document.getElementById('pass-help').innerHTML = chrome.i18n.getMessage('pass_help_w_link').replace('link', '"'+nextCloudSettings.schemeHost+'/settings/user/security"');
+    const passHelpEl = document.getElementById('pass-help');
+    if (nextCloudSettings.schemeHost) {
+        const url = (nextCloudSettings.schemeHost + '/settings/user/security').replace(/^\/+/, '');
+        const safeHref = url.startsWith('http') ? url : 'https://' + url.replace(/^\/+/, '');
+        const link = document.createElement('a');
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.href = safeHref;
+        link.textContent = chrome.i18n.getMessage('pass_help_link_text');
+        passHelpEl.textContent = '';
+        passHelpEl.appendChild(document.createTextNode(chrome.i18n.getMessage('pass_help_prefix') + ' '));
+        passHelpEl.appendChild(link);
+    } else {
+        passHelpEl.textContent = chrome.i18n.getMessage('pass_help');
     }
 
     formatSelector.addEventListener('change', function (e) {
@@ -110,7 +208,13 @@ function _bindSettingsForm()
     });
 
     let checkBtn = document.getElementById('settings-check-btn');
-    checkBtn.addEventListener('click', async () => {
+    if (checkBtn) checkBtn.addEventListener('click', async () => {
+        const origin = _originFromHost(nextCloudSettings.schemeHost);
+        if (origin) {
+            try {
+                await chrome.permissions.request({ origins: [origin + '/*'] });
+            } catch (e) { /* ignore */ }
+        }
         const authHeader = btoa(nextCloudSettings.user + ":" + nextCloudSettings.pass);
         const baseUri = nextCloudSettings.schemeHost + '/remote.php/dav/files/' + nextCloudSettings.user + nextCloudSettings.dir;
         const propertyRequestBody = `<?xml version="1.0"?>
@@ -144,6 +248,34 @@ function _bindSettingsForm()
             checkResult.classList.add('text-red');
         }));
     });
+
+    const bitrix24CheckBtn = document.getElementById('bitrix24-check-btn');
+    const bitrix24CheckResult = document.getElementById('bitrix24-check-result');
+    if (bitrix24CheckBtn && bitrix24CheckResult) {
+        bitrix24CheckBtn.textContent = chrome.i18n.getMessage('settings_check_btn');
+        bitrix24CheckBtn.addEventListener('click', async () => {
+            const baseUrl = (nextCloudSettings.bitrix24_webhook_url || '').trim().replace(/\/+$/, '');
+            if (!baseUrl) {
+                bitrix24CheckResult.textContent = chrome.i18n.getMessage('bitrix24_check_error');
+                bitrix24CheckResult.classList.add('text-red');
+                return;
+            }
+            try {
+                const origin = new URL(baseUrl).origin;
+                await chrome.permissions.request({ origins: [origin + '/*'] });
+            } catch (e) { /* ignore */ }
+            const url = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'disk.storage.getlist';
+            const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+            const data = await res.json();
+            if (data.result && Array.isArray(data.result)) {
+                bitrix24CheckResult.textContent = chrome.i18n.getMessage('nc_check_ok');
+                bitrix24CheckResult.classList.remove('text-red');
+            } else {
+                bitrix24CheckResult.textContent = (data.error_description || data.error || chrome.i18n.getMessage('nc_check_error'));
+                bitrix24CheckResult.classList.add('text-red');
+            }
+        });
+    }
 }
 
 function _showLoading()
@@ -208,7 +340,7 @@ async function _showInitUi()
         resultContainer.classList.remove('d-none');
         link.classList.remove('d-none');
         link.setAttribute('href', lastNcLink);
-        link.innerText = chrome.i18n.getMessage('Link');
+        link.innerText = chrome.i18n.getMessage('link');
 
         if(lastScreencastLink.hasOwnProperty('nc_last_link_date'))
         {
@@ -338,10 +470,31 @@ function _showPausedUi()
 function _bindSettingsButton() {
     let btn = document.getElementById('settings-btn');
     let saveBtn = document.getElementById('save-btn');
+    let cancelBtn = document.getElementById('cancel-btn');
     let contentMain = document.getElementById('content-main');
-    let contentSettings = document.getElementById('content-settings')
+    let contentSettings = document.getElementById('content-settings');
     let footer = document.getElementById('footer');
     let result = document.getElementById('result');
+
+    function closeSettings(restoreFromStorage) {
+        saveBtn.classList.add('d-none');
+        cancelBtn.classList.add('d-none');
+        contentSettings.classList.add('d-none');
+        btn.classList.remove('d-none');
+        contentMain.classList.remove('d-none');
+        footer.classList.remove('d-none');
+        if (restoreFromStorage) {
+            chrome.storage.sync.get(['next_cloud_settings']).then((item) => {
+                if (item && item.next_cloud_settings) {
+                    nextCloudSettings = item.next_cloud_settings;
+                    _restoreSettingsFormFrom(nextCloudSettings);
+                }
+                _showResultLink();
+            });
+        } else {
+            _showResultLink();
+        }
+    }
 
     btn.addEventListener('click', async () => {
         setTimeout(() => {
@@ -349,23 +502,36 @@ function _bindSettingsButton() {
             contentMain.classList.add('d-none');
             footer.classList.add('d-none');
             result.classList.add('d-none');
-
             saveBtn.classList.remove('d-none');
+            cancelBtn.classList.remove('d-none');
             contentSettings.classList.remove('d-none');
         }, 300);
     });
 
     saveBtn.addEventListener('click', async () => {
-        setTimeout(() => {
-            saveBtn.classList.add('d-none');
-            contentSettings.classList.add('d-none');
+        if (nextCloudSettings.save_destination === 'nextcloud' && nextCloudSettings.schemeHost) {
+            const origin = _originFromHost(nextCloudSettings.schemeHost);
+            if (origin) {
+                try {
+                    await chrome.permissions.request({ origins: [origin + '/*'] });
+                } catch (e) { /* user denied or invalid */ }
+            }
+        }
+        if (nextCloudSettings.save_destination === 'bitrix24' && nextCloudSettings.bitrix24_webhook_url) {
+            try {
+                const baseUrl = (nextCloudSettings.bitrix24_webhook_url || '').trim().replace(/\/+$/, '');
+                if (baseUrl) {
+                    const origin = new URL(baseUrl.startsWith('http') ? baseUrl : 'https://' + baseUrl).origin;
+                    await chrome.permissions.request({ origins: [origin + '/*'] });
+                }
+            } catch (e) { /* ignore */ }
+        }
+        setTimeout(() => closeSettings(false), 300);
+    });
 
-            btn.classList.remove('d-none');
-            contentMain.classList.remove('d-none');
-            footer.classList.remove('d-none');
-            _showResultLink();
-        }, 300);
-    })
+    cancelBtn.addEventListener('click', async () => {
+        setTimeout(() => closeSettings(true), 300);
+    });
 }
 
 function _showResultLink() {
@@ -379,7 +545,7 @@ function _showResultLink() {
     }
 }
 
-function _showError(msg)
+function _showError(i18nKey)
 {
     let contentError = document.getElementById('content-error');
     let contentMain = document.getElementById('content-main');
@@ -387,8 +553,9 @@ function _showError(msg)
     let footerText = document.getElementById('footer-text');
     let uploadProgress = document.getElementById('upload-progress');
 
-    contentError.innerText = chrome.i18n.getMessage('error');
-    footerText.innerText = chrome.i18n.getMessage('error');
+    const msg = i18nKey ? chrome.i18n.getMessage(i18nKey) : chrome.i18n.getMessage('error');
+    contentError.innerText = msg;
+    footerText.innerText = msg;
 
     footerText.classList.add('d-none');
     uploadProgress.classList.add('d-none');
@@ -438,9 +605,19 @@ const pauseRecording = () => {
 chrome.runtime.onMessage.addListener((message) => {
     let progressTextNode = document.getElementById('footer-text');
     let uploadProgressNode = document.getElementById('upload-progress');
+    if (message.name === 'recordingCanceled') {
+        nextCloudSettings.recording = false;
+        nextCloudSettings.paused = false;
+        nextCloudSettings.with_sound = false;
+        updateSettings(() => _showInitUi());
+        return;
+    }
     if(message.name === 'nextCloudUploadFileError')
     {
-        _showError(message.data);
+        let i18nKey = 'upload_file_error';
+        if (message.data === 'fetch_link_error') i18nKey = 'fetch_video_player_link_error';
+        else if (message.data === 'bitrix24_upload_error') i18nKey = 'bitrix24_upload_error';
+        _showError(i18nKey);
     }
     // Начало загрузки в nextcloud
     else if(message.name === 'beforeNextCloudUploadStart')

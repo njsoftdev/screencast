@@ -22,7 +22,7 @@ small {
 }
 
 #background {
-    background-image: url(/images/bg.svg);
+    background-image: url("images/bg.svg");
     background-repeat: no-repeat;
     background-size: cover;
     width: 650px;
@@ -130,8 +130,21 @@ button.btn-icon-stop::before {
     color: #F0F6FF;
 }
 
+.form-field:has(#settings-check-btn) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
 #settings-check-btn {
     width: 160px;
+    height: 59px;
+}
+
+#cancel-btn {
+    width: auto;
+    min-width: 100px;
     height: 59px;
 }
 

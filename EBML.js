@@ -512,7 +512,7 @@ var EBMLReader = /** @class */ (function (_super) {
         }
         if (elm.type === "m" && elm.name == "Segment") {
             if (this.segmentOffset != 0) {
-                console.warn("Multiple segments detected!");
+                // MediaRecorder may output multiple segments; we merge metadata from the first
             }
             this.segmentOffset = elm.dataStart;
             this.emit("segment_offset", this.segmentOffset);

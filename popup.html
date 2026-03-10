@@ -14,72 +14,97 @@
         </a>
       </div>
       <div id="settings" class="header-col">
-        <button id="settings-btn" class="btn">Настройки</button>
-        <button id="save-btn" class="btn btn-white-no-border d-none" >Сохранить</button>
+        <button id="settings-btn" class="btn"></button>
+        <button id="save-btn" class="btn btn-white-no-border d-none"></button>
       </div>
     </div>
     <div id="content-error" class="d-none"></div>
     <div id="content-main" class="">
       <div class="content-col">
-        <button id="rec-no-sound-btn" data-sound="0" class="js-rec-btn btn btn-white btn-icon-no-sound">
-          Запись без звука
-        </button>
+        <button id="rec-no-sound-btn" data-sound="0" class="js-rec-btn btn btn-white btn-icon-no-sound"></button>
       </div>
       <div class="content-col">
-        <button id="rec-with-sound-btn" data-sound="1" class="js-rec-btn btn btn-red btn-icon-with-sound">
-          Запись со звуком
-        </button>
+        <button id="rec-with-sound-btn" data-sound="1" class="js-rec-btn btn btn-red btn-icon-with-sound"></button>
       </div>
     </div>
     <div id="content-record" class="d-none">
       <div class="content-col-2">
-        <button id="pause" class="btn btn-white-no-border btn-icon-pause">
-          Пауза
-        </button>
+        <button id="pause" class="btn btn-white-no-border btn-icon-pause"></button>
       </div>
       <div class="content-col-2">
-        <button id="end" class="btn btn-blue btn-icon-stop">
-          Завершить
-        </button>
+        <button id="end" class="btn btn-blue btn-icon-stop"></button>
       </div>
     </div>
     <div id="content-settings" class="d-none">
       <div class="form-field">
-        <label for="video-file-format-selector" id="select-codec" class="mb25">Выбрать CODEC</label>
-
-        <select style="text-transform: uppercase" data-map="video_file_format" id="video-file-format-selector">
-          <option value="webm">video/webm (webm)</option>
-          <option value="webm-vp8">video/webm vp8</option>
-          <option value="webm-vp9">video/webm vp9</option>
-          <option value="webm-h264">video/webm h264</option>
-          <option value="mpeg">video/mpeg</option>
+        <label for="save-destination-select" id="save-destination-label" class="mb25"></label>
+        <select data-map="save_destination" id="save-destination-select">
+          <option value="local"></option>
+          <option value="nextcloud"></option>
+          <option value="bitrix24"></option>
         </select>
       </div>
-      <div class="form-field">
-        <p id="nc-settings-info">Если подключение к nextcloud не настроено, то запись будет идти в локальный файл.</p>
+      <div id="block-nextcloud" class="d-none">
+        <div class="form-field">
+          <label for="video-file-format-selector" id="select-codec" class="mb25"></label>
+          <select style="text-transform: uppercase" data-map="video_file_format" id="video-file-format-selector">
+            <option value="webm">video/webm (webm)</option>
+            <option value="webm-vp8">video/webm vp8</option>
+            <option value="webm-vp9">video/webm vp9</option>
+            <option value="webm-h264">video/webm h264</option>
+            <option value="mpeg">video/mpeg</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <p id="nc-settings-info"></p>
+        </div>
+        <div class="form-field">
+          <input data-map="schemeHost" id="input-address" type="text">
+        </div>
+        <div class="form-field">
+          <input data-map="dir" id="input-dir" type="text">
+        </div>
+        <div class="form-field">
+          <input data-map="user" id="input-username" type="text">
+        </div>
+        <div class="form-field">
+          <input data-map="pass" id="input-pass" type="password">
+          <br>
+          <small id="pass-help"></small>
+        </div>
+        <div class="form-field">
+          <p id="nc-check-result"></p>
+          <button id="settings-check-btn" class="btn btn-blue"></button>
+        </div>
+      </div>
+      <div id="block-bitrix24" class="d-none">
+        <div class="form-field">
+          <p id="bitrix24-settings-info"></p>
+        </div>
+        <div class="form-field">
+          <label for="input-bitrix24-webhook" id="bitrix24-webhook-label"></label>
+          <input data-map="bitrix24_webhook_url" id="input-bitrix24-webhook" type="url">
+        </div>
+        <div class="form-field">
+          <label for="bitrix24-storage-type" id="bitrix24-storage-type-label"></label>
+          <select data-map="bitrix24_storage_type" id="bitrix24-storage-type"></select>
+        </div>
+        <div class="form-field">
+          <label for="input-bitrix24-folder" id="bitrix24-folder-label"></label>
+          <input data-map="bitrix24_folder_name" id="input-bitrix24-folder" type="text">
+        </div>
+        <div class="form-field">
+          <p id="bitrix24-check-result"></p>
+          <button id="bitrix24-check-btn" class="btn btn-blue"></button>
+        </div>
       </div>
       <div class="form-field">
-        <input data-map="schemeHost" id="input-address" type="text" placeholder="Адрес nextcloud">
-      </div>
-      <div class="form-field">
-        <input data-map="dir" id="input-dir" type="text" placeholder="Директория">
-      </div>
-      <div class="form-field">
-        <input data-map="user" id="input-username" type="text" placeholder="Логин">
-      </div>
-      <div class="form-field">
-        <input data-map="pass" id="input-pass" type="password" placeholder="Пароль">
-        <br>
-        <small id="pass-help">Рекомендуется использовать пароль приложения.</small>
-      </div>
-      <div class="form-field">
-        <p id="nc-check-result"></p>
-        <button id="settings-check-btn" class="btn btn-blue">Проверить</button>
+        <button id="cancel-btn" class="btn btn-white-no-border"></button>
       </div>
     </div>
 
     <div id="indicator" class="d-none">
-      <progress id="upload-progress"></progress>
+      <progress id="upload-progress" max="1" value="0"></progress>
     </div>
 
     <div id="result" class="d-none">
@@ -89,7 +114,7 @@
 
     <div id="footer" class="">
       <div class="footer-col">
-        <p id="footer-text">Для записи экрана нажмите одну из кнопок</p>
+        <p id="footer-text"></p>
       </div>
     </div>
   </div>
