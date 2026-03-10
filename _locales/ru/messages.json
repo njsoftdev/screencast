@@ -1,12 +1,12 @@
 {
   "extName": {
-    "message": "NJ Screencast - запись экрана"
+    "message": "NJ Screencast (запись экрана)"
   },
   "extDesc": {
-    "message": "Решение для записи экрана"
+    "message": "Расширение для браузера Chrome для записи экрана"
   },
   "rec": {
-    "message": "REC"
+    "message": "ЗАПИСЬ"
   },
   "recording": {
     "message": "Идёт запись..."
@@ -33,7 +33,7 @@
     "message": "Возобновить"
   },
   "select_codec": {
-    "message": "Выбрать codec"
+    "message": "Выбрать кодек"
   },
   "footer_text": {
     "message": "Для записи экрана нажмите одну из кнопок"
@@ -99,7 +99,7 @@
     "message": "Произошла ошибка"
   },
   "logo_link": {
-    "message": "https://njsoft.ru"
+    "message": "https://njsoft.dev/?utm_source=nj-screencast&utm_medium=extension&utm_campaign=logo_link"
   },
   "upload_file_error": {
     "message": "Ошибка № 1. Произошла ошибка загрузки файла. Проверьте настройки для Nextcloud"

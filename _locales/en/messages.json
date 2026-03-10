@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "NJ Screencast solution for screen recording"
+    "message": "NJ Screencast (screen recording)"
   },
   "extDesc": {
-    "message": "Record your desktop with or without sound"
+    "message": "Google Chrome extension for screen recording"
   },
   "rec": {
     "message": "REC"
@@ -36,7 +36,7 @@
     "message": "Select codec"
   },
   "footer_text": {
-    "message": "To record your screen, press one of the buttons"
+    "message": "Press one of the buttons to start recording"
   },
   "input_address": {
     "message": "Nextcloud address"
@@ -51,16 +51,16 @@
     "message": "Password"
   },
   "recording_footer_text":{
-    "message": "Recording in progress. Pause or end recording."
+    "message": "Recording in progress. Pause or complete recording."
   },
   "recording_footer_text_s":{
-    "message": "Recording with sound is in progress. Pause or end recording."
+    "message": "Recording with sound is in progress. Pause or complete recording."
   },
   "recording_footer_text_no_s":{
-    "message": "Recording without sound. Pause or end recording."
+    "message": "Recording without sound. Pause or complete recording."
   },
   "recording_footer_text_paused": {
-    "message": "Recording has been paused. Click resume or end recording."
+    "message": "Recording has been paused. Click resume or complete recording."
   },
   "nc_check_ok": {
     "message": "There is a connection"
@@ -69,7 +69,7 @@
     "message": "No connection"
   },
   "next_cloud_wait_fetch_link": {
-    "message": "The download is complete. We receive a link..."
+    "message": "The download is complete. We're receiving a link..."
   },
   "next_cloud_file_uploading": {
     "message": "Loading..."
@@ -81,16 +81,16 @@
     "message": "Check"
   },
   "pass_help": {
-    "message": "Use application password."
+    "message": "It is recommended to use the application password."
   },
   "pass_help_prefix": {
     "message": "Use"
   },
   "pass_help_link_text": {
-    "message": "application password"
+    "message": "the application password"
   },
   "pass_help_w_link": {
-    "message": "Use <a target=\"_blank\" href=link>application password</a>."
+    "message": "Use <a target=\"_blank\" href=link>the application password</a>."
   },
   "cancel_btn": {
     "message": "Cancel"
@@ -99,7 +99,7 @@
     "message": "An error has occurred"
   },
   "logo_link": {
-    "message": "https://njsoft.dev"
+    "message": "https://njsoft.dev/?utm_source=nj-screencast&utm_medium=extension&utm_campaign=logo_link"
   },
   "upload_file_error": {
     "message": "Error № 1. An error has occurred."
