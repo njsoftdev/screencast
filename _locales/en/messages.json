@@ -24,7 +24,7 @@
     "message": "REC. WITH SOUND"
   },
   "pause": {
-    "message": "Пауза"
+    "message": "Pause"
   },
   "end": {
     "message": "Complete"
@@ -67,6 +67,9 @@
   },
   "nc_check_error": {
     "message": "No connection"
+  },
+  "nc_check_401_hint": {
+    "message": "Use the app password from Nextcloud: Settings → Security → App passwords (not your main password). Re-copy it without spaces."
   },
   "next_cloud_wait_fetch_link": {
     "message": "The download is complete. We're receiving a link..."
@@ -202,8 +205,5 @@
   },
   "delete_recording_btn": {
     "message": "Delete"
-  },
-  "recording_default_title": {
-    "message": "Recording"
   }
 }

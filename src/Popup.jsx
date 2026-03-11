@@ -36,6 +36,18 @@ function originFromHost(schemeHost) {
   }
 }
 
+function base64BasicAuth(user, pass) {
+  const creds = (user || '') + ':' + (pass || '');
+  try {
+    const bytes = new TextEncoder().encode(creds);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  } catch (_) {
+    return btoa(creds);
+  }
+}
+
 export default function NJScreencastUI() {
   const [screen, setScreen] = useState('main');
   const [connector, setConnector] = useState(null);
@@ -49,6 +61,8 @@ export default function NJScreencastUI() {
   const [bitrixCheckResult, setBitrixCheckResult] = useState({ ok: false, text: '' });
   const [messages, setMessages] = useState({});
   const [recordingsList, setRecordingsList] = useState([]);
+  const [isCheckingNextcloud, setIsCheckingNextcloud] = useState(false);
+  const [isCheckingBitrix24, setIsCheckingBitrix24] = useState(false);
   const hasLoadedFromStorage = useRef(false);
 
   const t = useCallback((key) => {
@@ -275,38 +289,57 @@ export default function NJScreencastUI() {
   };
 
   const checkNextcloud = async () => {
-    const origin = originFromHost(settings.schemeHost);
-    if (origin) try { await chrome.permissions.request({ origins: [origin + '/*'] }); } catch (_) {}
-    const authHeader = btoa((settings.user || '') + ':' + (settings.pass || ''));
-    const baseUri = (settings.schemeHost || '').replace(/\/+$/, '') + '/remote.php/dav/files/' + (settings.user || '') + (settings.dir || '');
-    const body = `<?xml version="1.0"?><d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns"><d:prop><oc:fileid /><d:getlastmodified /></d:prop></d:propfind>`;
+    setIsCheckingNextcloud(true);
+    setNcCheckResult({ ok: false, text: '' });
     try {
-      const res = await fetch(baseUri, { method: 'PROPFIND', cache: 'no-cache', headers: { Accept: 'text/plain', Depth: '1', 'Content-Type': 'application/xml', Authorization: 'Basic ' + authHeader }, body });
+      const origin = originFromHost(settings.schemeHost);
+      if (origin) try { await chrome.permissions.request({ origins: [origin + '/*'] }); } catch (_) {}
+      let baseUri = (settings.schemeHost || '').trim().replace(/\/+$/, '');
+      if (!baseUri.startsWith('http://') && !baseUri.startsWith('https://')) baseUri = 'https://' + baseUri;
+      const user = (settings.user || '').trim();
+      baseUri = baseUri + '/remote.php/dav/files/' + encodeURIComponent(user) + '/';
+      const pass = (settings.pass || '').trim();
+      const authHeader = base64BasicAuth(user, pass);
+      const body = `<?xml version="1.0"?><d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns"><d:prop><oc:fileid /><d:getlastmodified /></d:prop></d:propfind>`;
+      const res = await fetch(baseUri, { method: 'PROPFIND', cache: 'no-cache', credentials: 'omit', headers: { Accept: 'application/xml', Depth: '1', 'Content-Type': 'application/xml', Authorization: 'Basic ' + authHeader }, body });
       if (res.status < 400) setNcCheckResult({ ok: true, text: t('nc_check_ok') });
-      else setNcCheckResult({ ok: false, text: t('nc_check_error') });
-    } catch (_) {
-      setNcCheckResult({ ok: false, text: t('nc_check_error') });
+      else {
+        const errText = res.status === 401
+          ? t('nc_check_error') + ' (401). ' + t('nc_check_401_hint')
+          : res.status === 403
+            ? t('nc_check_error') + ' (403)'
+            : t('nc_check_error') + ' (' + res.status + ')';
+        setNcCheckResult({ ok: false, text: errText });
+      }
+    } catch (e) {
+      setNcCheckResult({ ok: false, text: t('nc_check_error') + (e && e.message ? ' — ' + e.message : '') });
+    } finally {
+      setIsCheckingNextcloud(false);
     }
   };
 
   const checkBitrix24 = async () => {
-    const baseUrl = (settings.bitrix24_webhook_url || '').trim().replace(/\/+$/, '');
-    if (!baseUrl) {
-      setBitrixCheckResult({ ok: false, text: t('bitrix24_check_error') });
-      return;
-    }
+    setIsCheckingBitrix24(true);
+    setBitrixCheckResult({ ok: false, text: '' });
     try {
-      const origin = new URL(baseUrl.startsWith('http') ? baseUrl : 'https://' + baseUrl).origin;
-      await chrome.permissions.request({ origins: [origin + '/*'] });
-    } catch (_) {}
-    const url = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'disk.storage.getlist';
-    try {
+      const baseUrl = (settings.bitrix24_webhook_url || '').trim().replace(/\/+$/, '');
+      if (!baseUrl) {
+        setBitrixCheckResult({ ok: false, text: t('bitrix24_check_error') });
+        return;
+      }
+      try {
+        const origin = new URL(baseUrl.startsWith('http') ? baseUrl : 'https://' + baseUrl).origin;
+        await chrome.permissions.request({ origins: [origin + '/*'] });
+      } catch (_) {}
+      const url = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'disk.storage.getlist';
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       const data = await res.json();
       if (data.result && Array.isArray(data.result)) setBitrixCheckResult({ ok: true, text: t('nc_check_ok') });
       else setBitrixCheckResult({ ok: false, text: data.error_description || data.error || t('nc_check_error') });
     } catch (_) {
       setBitrixCheckResult({ ok: false, text: t('nc_check_error') });
+    } finally {
+      setIsCheckingBitrix24(false);
     }
   };
 
@@ -501,7 +534,17 @@ export default function NJScreencastUI() {
             className="w-full rounded-xl border border-slate-200 px-3 py-2"
           />
           <p className={bitrixCheckResult.ok ? 'text-green-600' : 'text-red-600'}>{bitrixCheckResult.text}</p>
-          <button type="button" onClick={checkBitrix24} className="cursor-pointer rounded-xl bg-slate-200 px-3 py-1 text-sm hover:bg-slate-300">
+          <button
+            type="button"
+            onClick={checkBitrix24}
+            disabled={isCheckingBitrix24}
+            className={`inline-flex items-center justify-center rounded-xl px-3 py-1 text-sm ${
+              isCheckingBitrix24 ? 'bg-slate-200 text-slate-500 cursor-default opacity-60' : 'bg-slate-200 hover:bg-slate-300'
+            }`}
+          >
+            {isCheckingBitrix24 && (
+              <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+            )}
             {t('settings_check_btn')}
           </button>
           <div className="flex gap-3 pt-2">
@@ -545,7 +588,17 @@ export default function NJScreencastUI() {
           />
           <p className="text-xs text-slate-500">{t('pass_help')}</p>
           <p className={ncCheckResult.ok ? 'text-green-600' : 'text-red-600'}>{ncCheckResult.text}</p>
-          <button type="button" onClick={checkNextcloud} className="cursor-pointer rounded-xl bg-slate-200 px-3 py-1 text-sm hover:bg-slate-300">
+          <button
+            type="button"
+            onClick={checkNextcloud}
+            disabled={isCheckingNextcloud}
+            className={`inline-flex items-center justify-center rounded-xl px-3 py-1 text-sm ${
+              isCheckingNextcloud ? 'bg-slate-200 text-slate-500 cursor-default opacity-60' : 'bg-slate-200 hover:bg-slate-300'
+            }`}
+          >
+            {isCheckingNextcloud && (
+              <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+            )}
             {t('settings_check_btn')}
           </button>
           <div className="flex gap-3 pt-2">

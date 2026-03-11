@@ -68,6 +68,9 @@
   "nc_check_error": {
     "message": "Нет подключения"
   },
+  "nc_check_401_hint": {
+    "message": "Используйте пароль приложения из Nextcloud: Настройки → Безопасность → Пароли приложений (не основной пароль). Скопируйте заново без пробелов."
+  },
   "next_cloud_wait_fetch_link": {
     "message": "Загрузка выполнена. Получаем ссылку..."
   },
@@ -202,8 +205,5 @@
   },
   "delete_recording_btn": {
     "message": "Удалить"
-  },
-  "recording_default_title": {
-    "message": "Запись"
   }
 }
