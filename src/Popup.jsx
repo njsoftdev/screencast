@@ -15,6 +15,7 @@ const defaultSettings = {
   locale: 'en',
   record_with_sound: true,
   record_with_camera: false,
+  camera_view_shape: 'circle',
   paused: false,
   recording: false,
   with_sound: false,
@@ -65,7 +66,10 @@ export default function NJScreencastUI() {
   const [recordingsList, setRecordingsList] = useState([]);
   const [isCheckingNextcloud, setIsCheckingNextcloud] = useState(false);
   const [isCheckingBitrix24, setIsCheckingBitrix24] = useState(false);
+  const [cameraPreviewStream, setCameraPreviewStream] = useState(null);
   const hasLoadedFromStorage = useRef(false);
+  const previewVideoRef = useRef(null);
+  const cameraStreamRef = useRef(null);
 
   const t = useCallback((key) => {
     const k = (key || '').replace(/-/g, '_');
@@ -121,6 +125,38 @@ export default function NJScreencastUI() {
     chrome.storage.onChanged.addListener(listener);
     return () => chrome.storage.onChanged.removeListener(listener);
   }, [loadFromStorage]);
+
+  useEffect(() => {
+    const showPreview = settings.record_with_camera && !settings.recording && screen === 'main' && !uploading;
+    if (!showPreview) {
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach((t) => t.stop());
+        cameraStreamRef.current = null;
+        setCameraPreviewStream(null);
+      }
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then((s) => {
+        cameraStreamRef.current = s;
+        setCameraPreviewStream(s);
+      })
+      .catch(() => {});
+    return () => {
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach((t) => t.stop());
+        cameraStreamRef.current = null;
+      }
+      setCameraPreviewStream(null);
+    };
+  }, [settings.record_with_camera, settings.recording, screen, uploading]);
+
+  useEffect(() => {
+    if (previewVideoRef.current && cameraPreviewStream) {
+      previewVideoRef.current.srcObject = cameraPreviewStream;
+      previewVideoRef.current.play().catch(() => {});
+    }
+  }, [cameraPreviewStream]);
 
   useEffect(() => {
     if (typeof document.hidden === 'undefined') return;
@@ -402,6 +438,44 @@ export default function NJScreencastUI() {
                 />
               </button>
             </div>
+            {settings.record_with_camera && (
+              <>
+                <div className="flex items-center justify-between pl-1">
+                  <span className="text-sm text-slate-600">{t('camera_view_label')}</span>
+                  <div className="flex rounded-lg border border-slate-200 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setSettings((s) => ({ ...s, camera_view_shape: 'circle' }))}
+                      className={`px-3 py-1.5 text-sm ${settings.camera_view_shape === 'circle' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                    >
+                      {t('camera_view_circle')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSettings((s) => ({ ...s, camera_view_shape: 'square' }))}
+                      className={`px-3 py-1.5 text-sm ${settings.camera_view_shape === 'square' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                    >
+                      {t('camera_view_square')}
+                    </button>
+                  </div>
+                </div>
+                {cameraPreviewStream && (
+                  <div
+                    className={`overflow-hidden bg-slate-200 border-2 border-amber-500 shadow-md mx-auto flex justify-center ${
+                      settings.camera_view_shape === 'square' ? 'rounded-lg w-28 h-28' : 'rounded-full w-28 h-28'
+                    }`}
+                  >
+                    <video
+                      ref={previewVideoRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
+                )}
+              </>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-700">{t('record_sound_label')}</span>
               <button

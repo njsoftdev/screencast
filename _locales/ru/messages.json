@@ -29,6 +29,15 @@
   "record_camera_label": {
     "message": "Камера"
   },
+  "camera_view_label": {
+    "message": "Вид камеры"
+  },
+  "camera_view_circle": {
+    "message": "Круг"
+  },
+  "camera_view_square": {
+    "message": "Квадрат"
+  },
   "record_btn": {
     "message": "Записать"
   },

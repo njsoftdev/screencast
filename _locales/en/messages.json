@@ -29,6 +29,15 @@
   "record_camera_label": {
     "message": "Camera"
   },
+  "camera_view_label": {
+    "message": "Camera view"
+  },
+  "camera_view_circle": {
+    "message": "Circle"
+  },
+  "camera_view_square": {
+    "message": "Square"
+  },
   "record_btn": {
     "message": "Record"
   },

@@ -2,6 +2,7 @@ var paused = false;
 var mediaRecorder = null;
 var chunks = [];
 var canvasAnimationId = null;
+var canvasIntervalId = null;
 var cameraStream = null;
 chrome.runtime.onMessage.addListener((message) => {
   if (message.name === 'startRecording') {
@@ -84,6 +85,7 @@ async function recordScreen(currentTabId, streamId, audioStream)
         }
 
         var recordWithCamera = !!settings.record_with_camera; // use camera overlay regardless of save_destination (Nextcloud/Bitrix24/local)
+        var cameraViewShape = (settings.camera_view_shape === 'square') ? 'square' : 'circle';
 
         let sound = false;
         if(audioStream)
@@ -107,7 +109,10 @@ async function recordScreen(currentTabId, streamId, audioStream)
         // Если включена камера, пытаемся добавить картинку камеры поверх экрана через canvas
         if (recordWithCamera && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { max: 640 }, height: { max: 480 }, frameRate: { max: 15 } },
+                    audio: false
+                });
                 var screenVideo = document.createElement('video');
                 screenVideo.srcObject = mediaStream;
                 screenVideo.muted = true;
@@ -125,7 +130,8 @@ async function recordScreen(currentTabId, streamId, audioStream)
                 canvas.height = trackSettings.height || 720;
                 var ctx = canvas.getContext('2d');
 
-                var mixedStream = canvas.captureStream(30);
+                var drawFps = 15;
+                var mixedStream = canvas.captureStream(drawFps);
                 var canvasTrack = mixedStream.getVideoTracks()[0];
                 var requestFrame = canvasTrack && typeof canvasTrack.requestFrame === 'function' ? canvasTrack.requestFrame.bind(canvasTrack) : null;
                 mediaStream.getAudioTracks().forEach(function (track) {
@@ -143,24 +149,35 @@ async function recordScreen(currentTabId, streamId, audioStream)
                     waitReady();
                 });
 
+                var targetFps = drawFps;
                 function drawFrame() {
                     if (screenVideo.readyState >= 2) {
                         ctx.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
                     }
                     if (camVideo.readyState >= 2) {
-                        var size = Math.floor(canvas.height * 0.25);
+                        var size = Math.floor(canvas.height * 0.125);
                         var x = canvas.width - size - 24;
                         var y = canvas.height - size - 24;
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-                        ctx.clip();
-                        ctx.drawImage(camVideo, x, y, size, size);
-                        ctx.restore();
+                        var vw = camVideo.videoWidth || 1;
+                        var vh = camVideo.videoHeight || 1;
+                        var s = Math.min(vw, vh);
+                        var sx = (vw - s) / 2;
+                        var sy = (vh - s) / 2;
+                        if (cameraViewShape === 'square') {
+                            ctx.drawImage(camVideo, sx, sy, s, s, x, y, size, size);
+                        } else {
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+                            ctx.clip();
+                            ctx.drawImage(camVideo, sx, sy, s, s, x, y, size, size);
+                            ctx.restore();
+                        }
                     }
                     if (requestFrame) requestFrame();
-                    canvasAnimationId = requestAnimationFrame(drawFrame);
                 }
+                var intervalMs = Math.round(1000 / targetFps);
+                canvasIntervalId = setInterval(drawFrame, intervalMs);
                 drawFrame();
                 streamForRecorder = mixedStream;
             } catch (e) {
@@ -187,6 +204,10 @@ async function recordScreen(currentTabId, streamId, audioStream)
             if (canvasAnimationId) {
                 cancelAnimationFrame(canvasAnimationId);
                 canvasAnimationId = null;
+            }
+            if (canvasIntervalId) {
+                clearInterval(canvasIntervalId);
+                canvasIntervalId = null;
             }
             var item = await chrome.storage.sync.get(['next_cloud_settings']);
             var settingsOnStop = (item && item.next_cloud_settings) ? item.next_cloud_settings : {};
