@@ -6,7 +6,7 @@
     "message": "Расширение для браузера Chrome для записи экрана"
   },
   "rec": {
-    "message": "ЗАПИСЬ"
+    "message": "REC"
   },
   "recording": {
     "message": "Идёт запись..."
@@ -36,7 +36,7 @@
     "message": "Выбрать кодек"
   },
   "footer_text": {
-    "message": "Для записи экрана нажмите одну из кнопок"
+    "message": "Ни одной записи не найдено"
   },
   "input_address": {
     "message": "Адрес Nextcloud"
@@ -123,7 +123,7 @@
     "message": "Сохранить запись"
   },
   "save_destination_local": {
-    "message": "Локально (по умолчанию)"
+    "message": "Локально"
   },
   "save_destination_nextcloud": {
     "message": "Nextcloud"
@@ -141,7 +141,7 @@
     "message": "Диск"
   },
   "bitrix24_storage_personal": {
-    "message": "Личный диск (по умолчанию)"
+    "message": "Личный диск"
   },
   "bitrix24_storage_common": {
     "message": "Общий диск"
@@ -154,5 +154,56 @@
   },
   "bitrix24_upload_error": {
     "message": "Ошибка загрузки в Битрикс24. Проверьте URL вебхука и права."
+  },
+  "last_recording": {
+    "message": "Последняя запись"
+  },
+  "all_recordings_title": {
+    "message": "Все записи"
+  },
+  "all_recordings_btn": {
+    "message": "Все записи"
+  },
+  "back_btn": {
+    "message": "Назад"
+  },
+  "connect_btn": {
+    "message": "Подключить"
+  },
+  "open_link": {
+    "message": "Открыть ссылку"
+  },
+  "saved_to": {
+    "message": "Сохранено в"
+  },
+  "always_available": {
+    "message": "Всегда доступно"
+  },
+  "not_connected": {
+    "message": "Не подключено"
+  },
+  "recorder_title": {
+    "message": "Запись экрана"
+  },
+  "language_label": {
+    "message": "Язык"
+  },
+  "language_en": {
+    "message": "Английский"
+  },
+  "language_ru": {
+    "message": "Русский"
+  },
+  "reset_default_btn": {
+    "message": "Сбросить по умолчанию"
+  },
+  "recording_note_placeholder": {
+    "message": "Добавить заметку..."
+  },
+  "delete_recording_btn": {
+    "message": "Удалить"
+  },
+  "recording_default_title": {
+    "message": "Запись"
   }
 }

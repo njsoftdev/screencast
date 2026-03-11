@@ -1,32 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warning</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #000000;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        .warning {
-            background-color: #fe5c54;
-            color: #fff;
-            padding: 10px;
-            font-size: 18px;
-            text-align: center; /* Center-align the text */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #fff;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 220px;
+      padding: 12px;
+      background: #fffbeb;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      box-sizing: border-box;
+    }
+    .card-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .card-icon svg {
+      display: block;
+      width: 16px;
+      height: 16px;
+    }
+    .card-text {
+      min-width: 0;
+      flex: 1;
+    }
+    .card-title {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+      color: #92400e;
+    }
+    .card-desc {
+      margin: 4px 0 0;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #b45309;
+    }
+  </style>
 </head>
 <body>
-    <div class="warning" id="dont-close-window">
-        Do not close this window
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" style="fill: #f59e0b;" />
+      </svg>
     </div>
+    <div class="card-text">
+      <h3 class="card-title" id="recording-title">Recording in progress</h3>
+      <p class="card-desc" id="dont-close-window">Do not close this window</p>
+    </div>
+  </div>
+  <script src="EBML.js"></script>
+  <script src="recorder.js"></script>
 </body>
-<script src="EBML.js"></script>
-<script src="recorder.js"></script>
 </html>

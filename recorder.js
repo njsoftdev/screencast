@@ -29,7 +29,10 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
-document.getElementById('dont-close-window').innerText = chrome.i18n.getMessage('dont_close_window');
+var dontCloseEl = document.getElementById('dont-close-window');
+if (dontCloseEl) dontCloseEl.innerText = chrome.i18n.getMessage('dont_close_window');
+var recordingTitleEl = document.getElementById('recording-title');
+if (recordingTitleEl) recordingTitleEl.innerText = chrome.i18n.getMessage('recording');
 
 function startRecording(currentTabId, noSound){
   // Prompt user to choose screen or window

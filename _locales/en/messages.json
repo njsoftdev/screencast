@@ -24,7 +24,7 @@
     "message": "REC. WITH SOUND"
   },
   "pause": {
-    "message": "Pause"
+    "message": "Пауза"
   },
   "end": {
     "message": "Complete"
@@ -36,7 +36,7 @@
     "message": "Select codec"
   },
   "footer_text": {
-    "message": "Press one of the buttons to start recording"
+    "message": "No records found"
   },
   "input_address": {
     "message": "Nextcloud address"
@@ -123,7 +123,7 @@
     "message": "Save recording"
   },
   "save_destination_local": {
-    "message": "Locally (default)"
+    "message": "Locally"
   },
   "save_destination_nextcloud": {
     "message": "Nextcloud"
@@ -141,7 +141,7 @@
     "message": "Drive"
   },
   "bitrix24_storage_personal": {
-    "message": "Personal drive (default)"
+    "message": "Personal drive"
   },
   "bitrix24_storage_common": {
     "message": "Common drive"
@@ -154,5 +154,56 @@
   },
   "bitrix24_upload_error": {
     "message": "Bitrix24 upload error. Check webhook URL and permissions."
+  },
+  "last_recording": {
+    "message": "Last recording"
+  },
+  "all_recordings_title": {
+    "message": "All Recordings"
+  },
+  "all_recordings_btn": {
+    "message": "All Recordings"
+  },
+  "back_btn": {
+    "message": "Back"
+  },
+  "connect_btn": {
+    "message": "Connect"
+  },
+  "open_link": {
+    "message": "Open link"
+  },
+  "saved_to": {
+    "message": "Saved to"
+  },
+  "always_available": {
+    "message": "Always available"
+  },
+  "not_connected": {
+    "message": "Not connected"
+  },
+  "recorder_title": {
+    "message": "Screen Recorder"
+  },
+  "language_label": {
+    "message": "Language"
+  },
+  "language_en": {
+    "message": "English"
+  },
+  "language_ru": {
+    "message": "Russian"
+  },
+  "reset_default_btn": {
+    "message": "Reset to default"
+  },
+  "recording_note_placeholder": {
+    "message": "Add a note..."
+  },
+  "delete_recording_btn": {
+    "message": "Delete"
+  },
+  "recording_default_title": {
+    "message": "Recording"
   }
 }

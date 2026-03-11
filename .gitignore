@@ -6,3 +6,7 @@ DC_Store
 .DC_Store
 node_modules/
 ts-ebml/
+dist/
+popup.html
+popup-popup-src.js
+popup-popup-src.css
