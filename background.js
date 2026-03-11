@@ -1,11 +1,11 @@
 const RECORDING_FLAG_KEY = 'nj_screencast_recording';
 
-const startRecording = async (msg) => {
+const startRecording = async (request) => {
+  const msg = request && request.name;
   const withSound = msg === 'initiateRecording';
   await chrome.storage.local.set({ [RECORDING_FLAG_KEY]: { active: true, with_sound: withSound } });
 
-  const item = await chrome.storage.sync.get(['next_cloud_settings']);
-  const settings = (item && item.next_cloud_settings) ? item.next_cloud_settings : {};
+  const settings = request.settings || (await chrome.storage.sync.get(['next_cloud_settings'])).next_cloud_settings || {};
   const next = { ...settings, recording: true, paused: false, with_sound: withSound };
   await chrome.storage.sync.set({ next_cloud_settings: next });
 
@@ -34,7 +34,7 @@ const startRecording = async (msg) => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.name === 'initiateRecording' || request.name === 'initiateRecordingNoSound') {
-    startRecording(request.name);
+    startRecording(request);
     return;
   }
   if (request.name === 'stopRecording') {
@@ -44,6 +44,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.name === 'recordingCanceled') {
     chrome.storage.local.remove(RECORDING_FLAG_KEY);
     return;
+  }
+  if (request.name === 'ensureNextcloudPermission') {
+    const origin = (request.origin || '').trim();
+    if (!origin) {
+      sendResponse({ ok: false });
+      return;
+    }
+    const url = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    const perm = url + '/*';
+    chrome.permissions.contains({ origins: [perm] }).then((has) => {
+      if (has) {
+        sendResponse({ ok: true });
+        return;
+      }
+      chrome.permissions.request({ origins: [perm] }).then((granted) => {
+        sendResponse({ ok: granted });
+      }).catch(() => sendResponse({ ok: false }));
+    });
+    return true;
   }
   if (request.name === 'nextCloudUploadSuccess' || request.name === 'nextCloudUploadFileError' || request.name === 'captureFinished') {
     chrome.storage.local.remove(RECORDING_FLAG_KEY);

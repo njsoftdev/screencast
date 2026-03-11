@@ -23,6 +23,15 @@
   "rec_with_sound_btn": {
     "message": "REC. WITH SOUND"
   },
+  "record_sound_label": {
+    "message": "Sound"
+  },
+  "record_camera_label": {
+    "message": "Camera"
+  },
+  "record_btn": {
+    "message": "Record"
+  },
   "pause": {
     "message": "Pause"
   },

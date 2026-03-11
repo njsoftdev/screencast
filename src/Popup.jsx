@@ -13,6 +13,8 @@ const defaultSettings = {
   bitrix24_storage_type: 'personal',
   bitrix24_folder_name: 'screen-recordings',
   locale: 'en',
+  record_with_sound: true,
+  record_with_camera: false,
   paused: false,
   recording: false,
   with_sound: false,
@@ -189,11 +191,15 @@ export default function NJScreencastUI() {
     return () => chrome.runtime.onMessage.removeListener(listener);
   }, [setSettings]);
 
-  const startRecording = (withSound) => {
+  const startRecording = (withSoundParam) => {
+    const withSound = withSoundParam != null ? !!withSoundParam : !!settings.record_with_sound;
     const next = { ...settings, recording: true, paused: false, with_sound: withSound };
     chrome.storage.sync.set({ next_cloud_settings: next }).then(() => {
       setSettings((s) => ({ ...s, recording: true, paused: false, with_sound: withSound }));
-      chrome.runtime.sendMessage({ name: withSound ? 'initiateRecording' : 'initiateRecordingNoSound' });
+      chrome.runtime.sendMessage({
+        name: withSound ? 'initiateRecording' : 'initiateRecordingNoSound',
+        settings: next,
+      });
     });
     chrome.action?.setBadgeText({ text: t('rec') });
     chrome.action?.setBadgeBackgroundColor({ color: '#eb1e3e' });
@@ -379,13 +385,39 @@ export default function NJScreencastUI() {
 
       {!uploading && screen === 'main' && !settings.recording && (
         <div className="space-y-6 px-6 py-6">
-          <div className="grid grid-cols-2 gap-4">
-            <button type="button" onClick={() => startRecording(false)} className="cursor-pointer rounded-2xl bg-slate-900 px-6 py-6 text-lg font-semibold text-white hover:bg-slate-800">
-              {t('rec_no_sound_btn')}
-            </button>
-            <button type="button" onClick={() => startRecording(true)} className="cursor-pointer rounded-2xl bg-red-600 px-6 py-6 text-lg font-semibold text-white hover:bg-red-700">
-              {t('rec_with_sound_btn')}
-            </button>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-700">{t('record_camera_label')}</span>
+              <button
+                type="button"
+                onClick={() => setSettings((s) => ({ ...s, record_with_camera: !s.record_with_camera }))}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.record_with_camera ? 'bg-emerald-500' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.record_with_camera ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-700">{t('record_sound_label')}</span>
+              <button
+                type="button"
+                onClick={() => setSettings((s) => ({ ...s, record_with_sound: !s.record_with_sound }))}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  settings.record_with_sound ? 'bg-emerald-500' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.record_with_sound ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           {lastLink && (
@@ -413,9 +445,22 @@ export default function NJScreencastUI() {
             <button type="button" onClick={() => setScreen('settings')} className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50">
               {t('settings_btn')}
             </button>
-            <button type="button" onClick={() => setScreen('recordings')} className="cursor-pointer rounded-xl bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800">
-              {t('all_recordings_btn')}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setScreen('recordings')}
+                className="cursor-pointer rounded-xl border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50"
+              >
+                {t('all_recordings_btn')}
+              </button>
+              <button
+                type="button"
+                onClick={() => startRecording()}
+                className="cursor-pointer rounded-2xl bg-slate-900 px-6 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                {t('record_btn')}
+              </button>
+            </div>
           </div>
         </div>
       )}

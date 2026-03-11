@@ -1,6 +1,8 @@
 var paused = false;
 var mediaRecorder = null;
 var chunks = [];
+var canvasAnimationId = null;
+var cameraStream = null;
 chrome.runtime.onMessage.addListener((message) => {
   if (message.name === 'startRecording') {
     startRecording(message.body.currentTab.id)
@@ -81,6 +83,8 @@ async function recordScreen(currentTabId, streamId, audioStream)
             bitrix24.setupFromStorage(settings);
         }
 
+        var recordWithCamera = !!settings.record_with_camera; // use camera overlay regardless of save_destination (Nextcloud/Bitrix24/local)
+
         let sound = false;
         if(audioStream)
         {
@@ -98,7 +102,73 @@ async function recordScreen(currentTabId, streamId, audioStream)
             return;
         }
         const options = { mimeType: videoMime };
-        mediaRecorder = new MediaRecorder(mediaStream, options);
+
+        var streamForRecorder = mediaStream;
+        // Если включена камера, пытаемся добавить картинку камеры поверх экрана через canvas
+        if (recordWithCamera && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                var screenVideo = document.createElement('video');
+                screenVideo.srcObject = mediaStream;
+                screenVideo.muted = true;
+                screenVideo.play();
+
+                var camVideo = document.createElement('video');
+                camVideo.srcObject = cameraStream;
+                camVideo.muted = true;
+                camVideo.play();
+
+                var canvas = document.createElement('canvas');
+                var screenTrack = mediaStream.getVideoTracks()[0];
+                var trackSettings = screenTrack && screenTrack.getSettings ? screenTrack.getSettings() : {};
+                canvas.width = trackSettings.width || 1280;
+                canvas.height = trackSettings.height || 720;
+                var ctx = canvas.getContext('2d');
+
+                var mixedStream = canvas.captureStream(30);
+                var canvasTrack = mixedStream.getVideoTracks()[0];
+                var requestFrame = canvasTrack && typeof canvasTrack.requestFrame === 'function' ? canvasTrack.requestFrame.bind(canvasTrack) : null;
+                mediaStream.getAudioTracks().forEach(function (track) {
+                    mixedStream.addTrack(track);
+                });
+
+                await new Promise(function (resolve) {
+                    function waitReady() {
+                        if (screenVideo.readyState >= 2) {
+                            resolve();
+                            return;
+                        }
+                        setTimeout(waitReady, 50);
+                    }
+                    waitReady();
+                });
+
+                function drawFrame() {
+                    if (screenVideo.readyState >= 2) {
+                        ctx.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+                    }
+                    if (camVideo.readyState >= 2) {
+                        var size = Math.floor(canvas.height * 0.25);
+                        var x = canvas.width - size - 24;
+                        var y = canvas.height - size - 24;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+                        ctx.clip();
+                        ctx.drawImage(camVideo, x, y, size, size);
+                        ctx.restore();
+                    }
+                    if (requestFrame) requestFrame();
+                    canvasAnimationId = requestAnimationFrame(drawFrame);
+                }
+                drawFrame();
+                streamForRecorder = mixedStream;
+            } catch (e) {
+                cameraStream = null;
+            }
+        }
+
+        mediaRecorder = new MediaRecorder(streamForRecorder, options);
 
         chunks = [];
 
@@ -110,6 +180,14 @@ async function recordScreen(currentTabId, streamId, audioStream)
 
         mediaRecorder.onstop = async function(e) {
             mediaStream.getTracks().forEach(track => track.stop());
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(function (t) { t.stop(); });
+                cameraStream = null;
+            }
+            if (canvasAnimationId) {
+                cancelAnimationFrame(canvasAnimationId);
+                canvasAnimationId = null;
+            }
             var item = await chrome.storage.sync.get(['next_cloud_settings']);
             var settingsOnStop = (item && item.next_cloud_settings) ? item.next_cloud_settings : {};
             if (item && item.next_cloud_settings) nextCloud.setupFromStorage(settingsOnStop);
@@ -118,25 +196,32 @@ async function recordScreen(currentTabId, streamId, audioStream)
             }
 
             const blobFileSource = new Blob(chunks, {type: nextCloud.getVideoMime()});
-            const webMBuf = await fetch(URL.createObjectURL(blobFileSource)).then(res=> res.arrayBuffer());
-            const decoder = new EBML.Decoder();
-            const reader = new EBML.Reader();
-            reader.drop_default_duration = false;
-            var last_duration = 0;
+            var blobFile = blobFileSource;
+            var url = URL.createObjectURL(blobFileSource);
+            try {
+                const webMBuf = await fetch(URL.createObjectURL(blobFileSource)).then(res=> res.arrayBuffer());
+                const decoder = new EBML.Decoder();
+                const reader = new EBML.Reader();
+                reader.drop_default_duration = false;
+                var last_duration = 0;
 
-            reader.addListener("duration", ({timecodeScale, duration})=>{
-                last_duration += duration;
-            });
+                reader.addListener("duration", ({timecodeScale, duration})=>{
+                    last_duration += duration;
+                });
 
-            const elms = decoder.decode(webMBuf);
-            elms.forEach((elm)=>{ reader.read(elm); });
-            reader.stop();
+                const elms = decoder.decode(webMBuf);
+                elms.forEach((elm)=>{ reader.read(elm); });
+                reader.stop();
 
-            const refinedMetadataBuf = EBML.tools.makeMetadataSeekable(reader.metadatas, last_duration, reader.cues);
-            const body = webMBuf.slice(reader.metadataSize);
+                const refinedMetadataBuf = EBML.tools.makeMetadataSeekable(reader.metadatas, last_duration, reader.cues);
+                const body = webMBuf.slice(reader.metadataSize);
 
-            const blobFile = new Blob([refinedMetadataBuf, body], {type: nextCloud.getVideoMime()});
-            const url = URL.createObjectURL(blobFile);
+                blobFile = new Blob([refinedMetadataBuf, body], {type: nextCloud.getVideoMime()});
+                url = URL.createObjectURL(blobFile);
+            } catch (ebmlErr) {
+                // EBML fix failed (e.g. canvas recording produces invalid VINT) — use raw blob
+                console.warn('EBML duration fix skipped:', ebmlErr && ebmlErr.message);
+            }
             const fileName = 'Screen-recording-'+Date.now()+(sound ? '-with-sound' : '-no-sound') + '.' + nextCloud.getVideoFileFormat();
             const saveDestination = settingsOnStop.save_destination || 'local';
 
@@ -161,7 +246,14 @@ async function recordScreen(currentTabId, streamId, audioStream)
             }
 
             if (saveDestination === 'nextcloud' && nextCloud.hasSetup()) {
-                _doNextcloudUpload(blobFile, url, fileName);
+                var origin = nextCloud.getOrigin();
+                if (origin) {
+                    chrome.runtime.sendMessage({ name: 'ensureNextcloudPermission', origin: origin }, function () {
+                        _doNextcloudUpload(blobFile, url, fileName);
+                    });
+                } else {
+                    _doNextcloudUpload(blobFile, url, fileName);
+                }
                 return;
             }
 
@@ -228,30 +320,55 @@ function _doNextcloudUpload(blobFile, url, fileName) {
     nextCloud.uploadFile(blobFile, fileName)
         .then(function (response) {
             chrome.runtime.sendMessage({ name: 'nextCloudUploadWaitFetchLink', data: '' });
-            return nextCloud.fetchVideoPlayerLink(fileName);
+            return nextCloud.createPublicShareLink(fileName);
         })
         .then(function (link) {
             var dt = new Intl.DateTimeFormat(undefined, {
                 year: "numeric", month: "short", day: "numeric",
                 hour: "numeric", minute: "numeric", second: "numeric"
             }).format(new Date());
-            chrome.storage.sync.set({ nc_last_link: link, nc_last_link_date: dt });
-            chrome.runtime.sendMessage({ name: 'nextCloudUploadSuccess', data: { url: link, date_time: dt } });
+            chrome.storage.sync.set({ nc_last_link: link || '', nc_last_link_date: dt });
+            chrome.runtime.sendMessage({ name: 'nextCloudUploadSuccess', data: { url: link || '', date_time: dt } });
             _closeRecorder();
         })
         .catch(function (reason) {
-            chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: 'upload_error' });
+            const errMsg = reason && (reason.message || String(reason)) || 'upload_error';
+            chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: errMsg });
             _downloadLocal(url, fileName);
             _saveLocal(blobFile);
-            _showError(chrome.i18n.getMessage('upload_file_error'));
-            console.error('upload_file_error');
+            var displayMsg = chrome.i18n.getMessage('upload_file_error');
+            if (errMsg && errMsg !== 'upload_error') displayMsg = displayMsg + ' ' + errMsg;
+            _showError(displayMsg);
+            console.error('upload_file_error', reason);
         });
+}
+
+function _base64BasicAuth(user, pass) {
+    var creds = (user || '') + ':' + (pass || '');
+    try {
+        var bytes = new TextEncoder().encode(creds);
+        var binary = '';
+        for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+    } catch (e) {
+        return btoa(unescape(encodeURIComponent(creds)));
+    }
 }
 
 let nextCloud = {
     ns: 'DAV:',
+    getOrigin: function () {
+        var host = (this.schemeHost || '').trim().replace(/\/+$/, '');
+        if (!host) return '';
+        try {
+            var u = new URL(host.indexOf('://') >= 0 ? host : 'https://' + host);
+            return u.origin;
+        } catch (e) {
+            return host.startsWith('http') ? host.split('/').slice(0, 3).join('/') : 'https://' + host;
+        }
+    },
     createPlayerLink: function (fileId) {
-        return this.schemeHost + '/apps/files/?dir=' +this.dir+'&openfile=' + fileId
+        return this.schemeHost + '/apps/files/?dir=' + (this.dir || '') + '&openfile=' + fileId
     },
     isCodecSupported: function (codec) {
         return MediaRecorder.isTypeSupported(codec) ? true : false;
@@ -291,10 +408,9 @@ let nextCloud = {
     dir: '',
     schemeHost: '', //без trailing slah
     hasSetup: function () {
-        return this.schemeHost !== null && this.schemeHost !== ''
-            && this.dir !== null && this.dir !== ''
-            && this.pass !== null && this.pass !== ''
-            && this.user !== null && this.user !== ''
+        return (this.schemeHost !== null && this.schemeHost !== '')
+            && (this.pass !== null && this.pass !== '')
+            && (this.user !== null && this.user !== '');
     },
     setupFromStorage: function (ncSettings) {
         /**
@@ -310,10 +426,71 @@ let nextCloud = {
         this.video_file_format = ncSettings.hasOwnProperty('video_file_format') ? ncSettings.video_file_format : 'webm';
     },
     base_uri: function () {
-        return this.schemeHost + '/remote.php/dav/files/' + this.user + this.dir;
+        var host = (this.schemeHost || '').trim().replace(/\/+$/, '');
+        if (!host.match(/^https?:\/\//)) host = 'https://' + host;
+        var user = encodeURIComponent((this.user || '').trim());
+        var dir = (this.dir || '').trim().replace(/^\/+/, '').replace(/\/+$/, '');
+        var dirEnc = dir ? dir.split('/').map(encodeURIComponent).join('/') + '/' : '';
+        return host + '/remote.php/dav/files/' + user + '/' + dirEnc;
     },
     upload_path: function (fileName) {
-        return this.base_uri() + '/' + fileName
+        return this.base_uri() + encodeURIComponent(fileName);
+    },
+    ocsFilePath: function (fileName) {
+        var dir = (this.dir || '').trim().replace(/^\/+/, '').replace(/\/+$/, '');
+        return '/' + (dir ? dir + '/' : '') + fileName;
+    },
+    createPublicShareLink: async function (fileName) {
+        var host = (this.schemeHost || '').trim().replace(/\/+$/, '');
+        if (!host.match(/^https?:\/\//)) host = 'https://' + host;
+        var ocsUrl = host + '/ocs/v2.php/apps/files_sharing/api/v1/shares';
+        var path = this.ocsFilePath(fileName);
+        var body = 'path=' + encodeURIComponent(path) + '&shareType=3&permissions=1';
+        var createRes = await fetch(ocsUrl, {
+            method: 'POST',
+            credentials: 'omit',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': this.createAuthHeaderValue(),
+                'OCS-APIRequest': 'true'
+            },
+            body: body
+        });
+        var createText = await createRes.text();
+        if (!createRes.ok) {
+            throw new Error('Share create ' + createRes.status + ': ' + (createText || createRes.statusText).slice(0, 200));
+        }
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(createText, 'text/xml');
+        var dataEl = doc.querySelector('data');
+        if (dataEl) {
+            var urlEl = dataEl.querySelector('url');
+            if (urlEl) return (urlEl.textContent || '').trim();
+        }
+        var idEl = doc.querySelector('id');
+        var shareId = idEl ? (idEl.textContent || '').trim() : '';
+        if (!shareId) return null;
+        var getUrl = host + '/ocs/v2.php/apps/files_sharing/api/v1/shares/' + shareId;
+        var getRes = await fetch(getUrl, {
+            method: 'GET',
+            credentials: 'omit',
+            headers: {
+                'Authorization': this.createAuthHeaderValue(),
+                'OCS-APIRequest': 'true'
+            }
+        });
+        var getText = await getRes.text();
+        if (!getRes.ok) return null;
+        var getDoc = parser.parseFromString(getText, 'text/xml');
+        var urlEl = getDoc.querySelector('url');
+        if (urlEl) return (urlEl.textContent || '').trim();
+        var tokenEl = getDoc.querySelector('token');
+        if (tokenEl) {
+            var token = (tokenEl.textContent || '').trim();
+            var base = host.replace(/\/+$/, '');
+            return token ? (base + '/index.php/s/' + token) : null;
+        }
+        return null;
     },
     fetchVideoPlayerLink: async function (fileName) {
         const propertyRequestBody = `<?xml version="1.0"?>
@@ -327,6 +504,7 @@ let nextCloud = {
         return new Promise((resolve, reject) => {
             fetch(this.base_uri(), {
                 method: 'PROPFIND',
+                credentials: 'omit',
                 headers: {
                     "Accept": "text/plain",
                     "Depth": 1,
@@ -335,7 +513,7 @@ let nextCloud = {
                 },
                 body: propertyRequestBody
             }).then((response) => {
-                response.text().then(text => {
+                return response.text().then(text => {
                     if (response.status < 400) {
                         const nodes = this.parseWebDavFileListXML(text);
                         const targetNode = nodes.find((node) => {
@@ -352,12 +530,12 @@ let nextCloud = {
                             resolve(null);
                         }
                     } else {
-                        reject(new Error('PROPFIND failed: ' + response.status));
+                        reject(new Error('PROPFIND ' + response.status + ': ' + (text || response.statusText).slice(0, 150)));
                     }
                 });
-            }, (reason) => {
-                chrome.runtime.sendMessage({ name: 'nextCloudUploadFileError', data: 'fetch_link_error' });
-                console.error('fetch_link_error');
+            }).catch((reason) => {
+                var err = reason && (reason.message || String(reason)) || 'fetch_link_error';
+                reject(new Error(err));
             });
         });
 
@@ -396,8 +574,9 @@ let nextCloud = {
                 console.log("completed stream");
             },
         });
-        return await fetch(url, {
+        const response = await fetch(url, {
             method: "PUT",
+            credentials: 'omit',
             headers: {
                 "Content-Type": "application/octet-stream",
                 "Authorization": this.createAuthHeaderValue()
@@ -405,9 +584,14 @@ let nextCloud = {
             body: blob.stream().pipeThrough(progressTrackingStream),
             duplex: "half",
         });
+        if (!response.ok) {
+            const errText = await response.text().catch(() => response.statusText);
+            throw new Error('Upload ' + response.status + ': ' + (errText || response.statusText).slice(0, 200));
+        }
+        return response;
     },
-    createAuthHeaderValue: () => {
-        return "Basic " + btoa(this.user + ":" + this.pass);
+    createAuthHeaderValue: function () {
+        return "Basic " + _base64BasicAuth(this.user, this.pass);
     }
 };
 
